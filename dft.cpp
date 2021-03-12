@@ -81,40 +81,6 @@ void Calc::executeDFT()
 }
 
 /*
- * 逆離散フーリエ変換
- */
-void Calc::executeIDFT()
-{
-    int k, n;  // LOOPインデックス
-    FILE *pf;  // ファイルポインタ
-
-    // 出力ファイルOPEN
-    pf = fopen(CSV_IDFT, "w");
-
-    // ヘッダ出力 ( k, 角周波数, DFT(実部), DFT(虚部), IDFT(実部), IDFT(虚部) )
-    fprintf(pf, "k,f,X_re,X_im,x_re,x_im\n");
-
-    // 計算・結果出力
-    for (n = 0; n < N; n++) {
-        IDFT_re[n] = 0.0;
-        IDFT_im[n] = 0.0;
-        for (k = 0; k < N; k++) {
-            IDFT_re[n] += DFT_re[k] * (cos((2 * M_PI / N) * k * n))
-                        - DFT_im[k] * (sin((2 * M_PI / N) * k * n));
-            IDFT_im[n] += DFT_re[k] * (sin((2 * M_PI / N) * k * n))
-                        + DFT_im[k] * (cos((2 * M_PI / N) * k * n));
-        }
-        IDFT_re[n] /= N;
-        IDFT_im[n] /= N;
-        fprintf(pf, "%d,%lf,%lf,%lf,%lf,%lf\n",
-            n, (2 * M_PI / N) * n, DFT_re[n], DFT_im[n], IDFT_re[n], IDFT_im[n]);
-    }
-
-    // 出力ファイルCLOSE
-    fclose(pf);
-}
-
-/*
  * メイン処理
  */
 int main()
