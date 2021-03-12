@@ -1,16 +1,16 @@
 /*********************************************
- * 離散フーリエ変換                          *
- *   f(t) = 2 * sin(4 * t) + 3 * cos(2 * t)  *
- *          ( 0 <= t < 2 * pi )              *
+ * 離散フーリエ変換                             *
+ *   f(t) = A * sin(2 * pi * F0 * t)         *
+ *          ( 0 <= t < 0.01 )                *
  *********************************************/
 #include <iostream> // for cout
 #include <math.h>   // for sin(), cos()
 #include <stdio.h>  // for printf()
 
-#define N 100             // 分割数
+#define N 800             // 分割数
+#define A 1               // 振幅
+#define F0 440            // 周波数
 #define CSV_DFT "DFT.csv" // 出力ファイル (DFT)
-
-using namespace std;
 
 int main() {
     double SRC_re[N]; //元データの実部
@@ -21,13 +21,13 @@ int main() {
     try {
         // 元データ作成
         for (int i = 0; i < N; i++) {
-            SRC_re[i] = 2 * sin(4 * (2 * M_PI / N) * i) + 3 * cos(2 * (2 * M_PI / N) * i);
+            SRC_re[i] = A * sin((2 * M_PI * F0 / N) * i);
             SRC_im[i] = 0.0;
 
-            // 離散フーリエ変換
-            FILE *pf; // ファイルポインタ
+            // ファイル構造体のポインタを作成
+            FILE *pf;
 
-            // 出力ファイルOPEN
+            // 出力ファイルOPEN(書き込み専用)
             pf = fopen(CSV_DFT, "w");
 
             // ヘッダ出力 ( k, 角周波数, 元データ(実部), 元データ(虚部), DFT(実部), DFT(虚部) )
@@ -50,7 +50,7 @@ int main() {
         }
 
     } catch (...) {
-        cout << "ERROR" << endl;
+        std::cout << "ERROR" << std::endl;
         return -1;
     }
 
