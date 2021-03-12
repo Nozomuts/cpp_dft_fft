@@ -1,0 +1,22 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build hello world",
+      "type": "shell",
+      "command": "g++", // g++ コマンドでコンパイルする
+      "args": [ // 実行するコマンドに渡す引数
+        "-g", // コンパイルの際にdebugのための情報を持ったファイルを生成
+        "-o", // コンパイル後のファイルの名前をこちらで指定するためのオプション
+        "${fileDirname}/${fileBasenameNoExtension}.out", // コンパイル後のファイル名
+        "${file}" // 現在開いているファイル名
+      ],
+      "group": { // タスクの種類
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
