@@ -1,4 +1,3 @@
-// fftbox.cpp
 #include <algorithm> // swap
 #include <complex>
 #include <iostream>
@@ -11,7 +10,7 @@ typedef unsigned int uint;
 static Complex one(1.0, 0.0);
 static Complex ione(0.0, 1.0);
 
-class FftBox {
+class FFT {
   private:
     Complex *array;
     size_t size; // arrayのサイズ
@@ -22,8 +21,8 @@ class FftBox {
     void bitReverse();
 
   public:
-    FftBox(size_t s) : use(s), size(nextPow2(s)), verbose(false) { array = new Complex[size]; };
-    ~FftBox() { delete[] array; };
+    FFT(size_t s) : use(s), size(nextPow2(s)), verbose(false) { array = new Complex[size]; };
+    ~FFT() { delete[] array; };
 
     Complex &operator[](int index) const {
         if (index < 0)
@@ -35,10 +34,9 @@ class FftBox {
     void dump();
 
     void fft(bool isReverse = false);
-    void ifft();
 };
 
-size_t FftBox::nextPow2(size_t s)
+size_t FFT::nextPow2(size_t s)
 // s以上の最小の2のべき乗を返す
 {
     size_t n = 1;
@@ -47,7 +45,7 @@ size_t FftBox::nextPow2(size_t s)
     return n;
 }
 
-void FftBox::bitReverse() {
+void FFT::bitReverse() {
     uint k, b, a;
     for (uint i = 0; i < size; i++) {
         k = 0;
@@ -66,14 +64,14 @@ void FftBox::bitReverse() {
     }
 }
 
-void FftBox::dump() {
+void FFT::dump() {
     uint end = verbose ? size : use;
     for (uint i = 0; i < end; i++)
         cout << array[i] << " ";
     cout << endl;
 }
 
-void FftBox::fft(bool isReverse) {
+void FFT::fft(bool isReverse) {
     bitReverse();
     size_t m = 2;
     Complex w, ww, t;
@@ -102,20 +100,12 @@ void FftBox::fft(bool isReverse) {
     }
 }
 
-void FftBox::ifft() {
-    fft(true);
-    double s = (double)size;
-    for (uint i = 0; i < size; i++)
-        array[i] /= s;
-}
-
-// --------------------
 #define N (8)
+#define RND ((double)rand() / (double)RAND_MAX)
 int main() {
     srand(time(NULL));
-    FftBox box(N);
+    FFT box(N);
 
-#define RND ((double)rand() / (double)RAND_MAX)
     for (int i = 0; i < N; i++)
         box[i] = Complex(RND, RND);
     box.setVerbose(true);
@@ -128,15 +118,10 @@ int main() {
     box.fft();
     for (int i = 0; i < N; i++)
         transform[i] = box[i];
-    // ifft後
-    box.ifft(); // == box.fft(true);
-    for (int i = 0; i < N; i++)
-        itransform[i] = box[i];
-
-    cout << "before\t\t\ttransform\t\t\titransform" << endl;
+    cout << "before\t\t\ttransform" << endl;
     for (int i = 0; i < N; i++) {
-        printf("(%9lf, %9lf) -> (%9lf, %9lf) -> (%9lf, %9lf)\n", before[i].real(), before[i].imag(),
-               transform[i].real(), transform[i].imag(), itransform[i].real(), itransform[i].imag());
+        printf("(%9lf, %9lf) -> (%9lf, %9lf)\n", before[i].real(), before[i].imag(), transform[i].real(),
+               transform[i].imag());
     }
     return 0;
 }
