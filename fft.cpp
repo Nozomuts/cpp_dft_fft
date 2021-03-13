@@ -1,6 +1,6 @@
-#include <complex>
-#include <math.h>
 #include <stdio.h>
+#include <math.h>
+#include <complex>
 
 #define N 80            // 分割数
 #define Fs (double)8000 // サンプリング周波数
@@ -9,7 +9,7 @@
 
 using namespace std; // cout, endl, string, to_string
 
-void fft(std::complex<double> *x, int _N) {
+void fft(std::complex<double> x[], int _N) {
     // Nが1以下で早期リターン
     if (_N <= 1) {
         return;
