@@ -12,4 +12,4 @@ f=(0:len-1)*(Fs/len);
 x=A*sin(2*pi*F0*t+phi);
 y=fft(x);
 
-y;
+y
