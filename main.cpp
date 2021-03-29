@@ -12,7 +12,7 @@
 using namespace std;    // cout, endl, swap
 using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
 
-void dft(complex<double> x[], int _N) {
+void dft(complex<double> x[], int _N, complex<double> *y) {
     complex<double> dft_out[N];
 
     // 出力用の配列初期化
@@ -26,6 +26,7 @@ void dft(complex<double> x[], int _N) {
             dft_out[k] += x[n] * exp(complex<double>(0, -2 * M_PI * k * n / N)); // (実部,虚部)
         }
         cout << dft_out[k] << endl;
+        y[k] = dft_out[k];
     }
 }
 
@@ -56,6 +57,8 @@ void bit_reverse(complex<double> *x, int _N) {
 
 int main() {
     complex<double> x_out[N]; // 元データ
+    complex<double> y_out[N]; // 元データ
+    complex<double> sum = 0;
     system_clock::time_point start, end;
 
     // 元データ作成
@@ -66,7 +69,7 @@ int main() {
 
     cout << "- - - DFT - - -" << endl;
     start = system_clock::now(); // 計測スタート時刻を保存
-    dft(x_out, N);
+    dft(x_out, N, y_out);
     end = system_clock::now(); // 計測終了時刻を保存
     // 要した時間を計算
     double dft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0);
@@ -92,6 +95,13 @@ int main() {
     ofstream fft_ofs("fft.txt");
     fft_ofs << fft_time;
     fft_ofs.close();
+
+    for (int i = 0; i < N; i++) {
+        sum += abs((x_out[i] - y_out[i]) * (x_out[i] - y_out[i]));
+    }
+
+    // dftとfftの結果の比較(差分の2乗平均の平方根)
+    cout << sqrt(real(sum) / (double)N) << endl;
 
     return 0;
 }
