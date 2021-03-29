@@ -1,5 +1,6 @@
 #include <chrono>
 #include <complex>
+#include <fstream>
 #include <iostream> // for cout
 
 #define N 64            // 分割数
@@ -9,7 +10,7 @@
 #define phi (double)0   // 初期位相
 
 using namespace std;    // cout, endl
-using namespace chrono; // system_clock, duration_cast, microseconds
+using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
 
 void dft(complex<double> x[], int _N) {
     complex<double> dft_out[N];
@@ -44,6 +45,9 @@ int main() {
     double time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0); // 要した時間を計算
     // 要した時間をミリ秒（1/1000秒）に変換して表示
     cout << time << " ms \n";
+    ofstream ofs("dft.txt");
+    ofs << time;
+    ofs.close();
 
     return 0;
 }

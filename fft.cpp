@@ -1,5 +1,6 @@
 #include <chrono>
 #include <complex>
+#include <fstream>
 #include <iostream> // for cout
 
 #define N 64            // 分割数
@@ -9,7 +10,7 @@
 #define phi (double)0   // 初期位相
 
 using namespace std;    // cout, endl, swap
-using namespace chrono; // system_clock, duration_cast, microseconds
+using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
 
 void fft(complex<double> *x, int _N, int q) {
     if (_N > 1) {
@@ -56,5 +57,9 @@ int main() {
         cout << x_out[i] << endl;
     }
     cout << time << " ms \n";
+    ofstream ofs("dft.txt");
+    ofs << time;
+    ofs.close();
+
     return 0;
 }
