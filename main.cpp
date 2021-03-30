@@ -9,7 +9,7 @@
 #define F0 (double)440  // 周波数
 #define phi (double)0   // 初期位相
 
-using namespace std;    // cout, endl, swap
+using namespace std;    // cout, endl, swap, ios
 using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
 
 void dft(complex<double> x[], int _N, complex<double> *y) {
@@ -89,11 +89,11 @@ int main() {
     cout << "DFT: " << dft_time << " ms" << endl;
     cout << "FFT: " << fft_time << " ms" << endl;
 
-    ofstream dft_ofs("dft.txt");
-    dft_ofs << dft_time;
+    ofstream dft_ofs("dft.txt", ios::app);
+    dft_ofs << dft_time << endl;
     dft_ofs.close();
-    ofstream fft_ofs("fft.txt");
-    fft_ofs << fft_time;
+    ofstream fft_ofs("fft.txt", ios::app);
+    fft_ofs << fft_time << endl;
     fft_ofs.close();
 
     for (int i = 0; i < N; i++) {
