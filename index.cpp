@@ -7,8 +7,7 @@
 #define F0 (double)440  // 周波数
 #define phi (double)0   // 初期位相
 
-using namespace std;    // cout, endl, swap, ios
-using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
+using namespace std;    // swap, complex
 
 void dft(complex<double> x[], int _N) {
     complex<double> dft_out[N];
