@@ -12,36 +12,28 @@
 using namespace std;    // cout, endl, swap, ios, complex
 using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
 
-void dft(complex<double> x[], complex<double> *y) {
-    int l = N;
-    complex<double> dft_out[l];
-
-    // 出力用の配列初期化
-    for (int i = 0; i < l; i++) {
-        dft_out[i] = complex<double>(0, 0);
-    }
-
-    // DFT計算
-    for (int k = 0; k < l; k++) {
-        for (int n = 0; n < l; n++) {
-            dft_out[k] += x[n] * exp(complex<double>(0, -2 * M_PI * k * n / N)); // (実部,虚部)
+void dft(double x_r[N], double x_i[N], double *dft_r, double *dft_i) {
+    for (int k = 0; k < N; k++) {
+        for (int n = 0; n < N; n++) {
+            dft_r[k] += x_r[n] * cos(2 * M_PI / N * k * n) + x_i[n] * sin(2 * M_PI / N * k * n);
+            dft_i[k] += x_r[n] * (-sin(2 * M_PI / N * k * n)) + x_i[n] * cos(2 * M_PI / N * k * n);
         }
-        cout << dft_out[k] << endl;
-        y[k] = dft_out[k];
     }
 }
 
-void fft(complex<double> *x) {
-    int n = N;
-    int m = n;
+void fft(double *x_r, double *x_i) {
+    int m = N;
     while (m > 1) {
-        for (int i = 0; i < n / m; i++) {
+        for (int i = 0; i < N / m; i++) {
             for (int j = 0; j < m / 2; j++) {
-                const complex<double> t = exp(complex<double>(0, -2 * M_PI * j / m));
-                const complex<double> a = x[i * m + j];
-                const complex<double> b = x[i * m + j + m / 2];
-                x[i * m + j] = a + b;
-                x[i * m + j + m / 2] = (a - b) * t;
+                double a_r = x_r[i * m + j];
+                double a_i = x_i[i * m + j];
+                double b_r = x_r[i * m + j + m / 2];
+                double b_i = x_i[i * m + j + m / 2];
+                x_r[i * m + j] = a_r + b_r;
+                x_i[i * m + j] = a_i + b_i;
+                x_r[i * m + j + m / 2] = (a_r - b_r) * cos(2 * M_PI / m * j) + (a_i - b_i) * sin(2 * M_PI / m * j);
+                x_i[i * m + j + m / 2] = (a_r - b_r) * (-sin(2 * M_PI / m * j)) + (a_i - b_i) * cos(2 * M_PI / m * j);
             }
         }
         m /= 2;
@@ -49,43 +41,49 @@ void fft(complex<double> *x) {
 }
 
 // ビット反転並べ替え
-void bit_reverse(complex<double> *x, int _N) {
-    for (int i = 0, j = 1; j < _N - 1; j++) {
-        for (int k = _N >> 1; k > (i ^= k); k >>= 1)
+void bit_reverse(double *x_r, double *x_i) {
+    for (int i = 0, j = 1; j < N - 1; j++) {
+        for (int k = N >> 1; k > (i ^= k); k >>= 1)
             ;
-        if (i < j)
-            swap(x[i], x[j]); // x[i]とx[j]を交換する
+        if (i < j) {
+            swap(x_r[i], x_r[j]); // 入れ替え
+            swap(x_i[i], x_i[j]);
+        }
     }
 }
 
 int main() {
-    complex<double> x_out[N]; // 元データ
-    complex<double> y_out[N]; // 元データ
-    complex<double> sum = 0;
+    double x_r[N], x_i[N], dft_r[N], dft_i[N];
+    double sum = 0;
     system_clock::time_point start, end;
 
     // 元データ作成
     for (int i = 0; i < N; i++) {
         // x(t) = A * sin(2 * pi * F0 * t + phi) ( 0 <= t < 0.008 )
-        x_out[i] = complex<double>(A * sin(2 * M_PI * F0 * i / Fs + phi), 0); // t = i / Fs
+        x_r[i] = A * sin(2 * M_PI * F0 * i / Fs + phi); // t = i / Fs
+        x_i[i] = 0;
     }
 
     cout << "- - - DFT - - -" << endl;
     start = system_clock::now(); // 計測スタート時刻を保存
-    dft(x_out, y_out);
+    dft(x_r, x_i, dft_r, dft_i);
     end = system_clock::now(); // 計測終了時刻を保存
     // 要した時間を計算
     double dft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0);
 
+    for (int i = 0; i < N; i++) {
+        cout << dft_r[i] << "," << dft_i[i] << endl;
+    }
+
     cout << "- - - FFT - - -" << endl;
     start = system_clock::now();
-    fft(x_out);
-    bit_reverse(x_out, N);
+    fft(x_r, x_i);
+    bit_reverse(x_r, x_i);
     end = system_clock::now();
     double fft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0);
 
     for (int i = 0; i < N; i++) {
-        cout << x_out[i] << endl;
+        cout << x_r[i] << "," << x_i[i] << endl;
     }
 
     // 要した時間をミリ秒（1/1000秒）に変換して表示
@@ -100,7 +98,7 @@ int main() {
     fft_ofs.close();
 
     for (int i = 0; i < N; i++) {
-        sum += abs((x_out[i] - y_out[i]) * (x_out[i] - y_out[i]));
+        sum += ((x_r[i] - dft_r[i]) * (x_r[i] - dft_r[i]) + (x_i[i] - dft_i[i]) * (x_i[i] - dft_i[i]));
     }
 
     // dftとfftの結果の比較(差分の2乗平均の平方根)
