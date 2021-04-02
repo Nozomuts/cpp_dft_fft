@@ -1,5 +1,4 @@
 #include <chrono>
-#include <complex>
 #include <fstream>
 #include <iostream> // for cout
 
@@ -102,7 +101,7 @@ int main() {
     }
 
     // dftとfftの結果の比較(差分の2乗平均の平方根)
-    cout << sqrt(real(sum) / (double)N) << endl;
+    cout << sqrt(sum / (double)N) << endl;
 
     return 0;
 }
