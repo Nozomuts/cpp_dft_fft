@@ -12,17 +12,18 @@
 using namespace std;    // cout, endl, swap, ios, complex
 using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
 
-void dft(complex<double> x[], int _N, complex<double> *y) {
-    complex<double> dft_out[N];
+void dft(complex<double> x[], complex<double> *y) {
+    int l = N;
+    complex<double> dft_out[l];
 
     // 出力用の配列初期化
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < l; i++) {
         dft_out[i] = complex<double>(0, 0);
     }
 
     // DFT計算
-    for (int k = 0; k < N; k++) {
-        for (int n = 0; n < N; n++) {
+    for (int k = 0; k < l; k++) {
+        for (int n = 0; n < l; n++) {
             dft_out[k] += x[n] * exp(complex<double>(0, -2 * M_PI * k * n / N)); // (実部,虚部)
         }
         cout << dft_out[k] << endl;
@@ -30,18 +31,20 @@ void dft(complex<double> x[], int _N, complex<double> *y) {
     }
 }
 
-void fft(complex<double> *x, int _N, int q) {
-    if (_N > 1) {
-        for (int k = 0; k < _N / 2; k++) {
-            const complex<double> t = exp(complex<double>(0, -2 * M_PI * k / _N));
-            const complex<double> a = x[q + k];
-            const complex<double> b = x[q + k + _N / 2];
-            x[q + k] = a + b;
-            x[q + k + _N / 2] = (a - b) * t;
+void fft(complex<double> *x) {
+    int n = N;
+    int m = n;
+    while (m > 1) {
+        for (int i = 0; i < n / m; i++) {
+            for (int j = 0; j < m / 2; j++) {
+                const complex<double> t = exp(complex<double>(0, -2 * M_PI * j / m));
+                const complex<double> a = x[i * m + j];
+                const complex<double> b = x[i * m + j + m / 2];
+                x[i * m + j] = a + b;
+                x[i * m + j + m / 2] = (a - b) * t;
+            }
         }
-        // 再帰
-        fft(x, _N / 2, q);
-        fft(x, _N / 2, _N / 2 + q);
+        m /= 2;
     }
 }
 
@@ -69,14 +72,14 @@ int main() {
 
     cout << "- - - DFT - - -" << endl;
     start = system_clock::now(); // 計測スタート時刻を保存
-    dft(x_out, N, y_out);
+    dft(x_out, y_out);
     end = system_clock::now(); // 計測終了時刻を保存
     // 要した時間を計算
     double dft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0);
 
     cout << "- - - FFT - - -" << endl;
     start = system_clock::now();
-    fft(x_out, N, 0);
+    fft(x_out);
     bit_reverse(x_out, N);
     end = system_clock::now();
     double fft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0);
