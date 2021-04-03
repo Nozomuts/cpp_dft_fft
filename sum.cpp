@@ -12,8 +12,10 @@ void ifs_sum(string file_name) {
     ifs.open(file_name, ios::in);
     while (!ifs.eof()) {
         getline(ifs, line);
-        sum += stod(line);
-        n++;
+        if (line.length() > 0) {
+            sum += stod(line);
+            n++;
+        }
     }
     ifs.close();
     cout << file_name << ": " << sum / n << endl;
