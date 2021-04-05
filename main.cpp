@@ -52,7 +52,7 @@ void bit_reverse(double *x_r, double *x_i) {
 }
 
 int main() {
-    double x_r[N], x_i[N], dft_r[N], dft_i[N];
+    double x_r[N], x_i[N], dft_r[N], dft_i[N]; // x_r,x_iは元データ兼fftのデータ
     double sum = 0;
     system_clock::time_point start, end;
 
@@ -97,11 +97,12 @@ int main() {
     fft_ofs.close();
 
     for (int i = 0; i < N; i++) {
+        // √(実部^2+虚部^2)^2 (差分の2乗)
         sum += ((x_r[i] - dft_r[i]) * (x_r[i] - dft_r[i]) + (x_i[i] - dft_i[i]) * (x_i[i] - dft_i[i]));
     }
 
     // dftとfftの結果の比較(差分の2乗平均の平方根)
-    cout << sqrt(sum / (double)N) << endl;
+    cout << sqrt(sum / N) << endl;
 
     return 0;
 }
