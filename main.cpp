@@ -41,7 +41,7 @@ void fft(double *x_r, double *x_i) {
 
 // ビット反転並べ替え
 void bit_reverse(double *x_r, double *x_i) {
-    for (int i = 0, j = 1; j < N - 1; j++) {
+    for (int i = 0, j = 1; j < N; j++) {
         for (int k = N >> 1; k > (i ^= k); k >>= 1)
             ;
         if (i < j) {
