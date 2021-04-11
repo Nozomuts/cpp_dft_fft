@@ -67,20 +67,20 @@ int main() {
         x_i[i] = 0;
     }
 
-    start = system_clock::now(); // 計測スタート時刻を保存
-    for (int i = 0; i < N; i++) { // N回繰り返して平均を求める
+    start = system_clock::now();      // 計測スタート時刻を保存
+    for (int i = 0; i < N * N; i++) { // N回繰り返して平均を求める
         dft(x_r, x_i);
     }
     end = system_clock::now(); // 計測終了時刻を保存
     // 要した時間を計算
-    double dft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0) / N;
+    double dft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0) / (N * N);
 
     start = system_clock::now();
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < N * N; i++) {
         fft(x_r, x_i);
     }
     end = system_clock::now();
-    double fft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0) / N;
+    double fft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0) / (N * N);
 
     // 要した時間をミリ秒（1/1000秒）に変換して表示
     cout << "DFT: " << dft_time << " ms" << endl;

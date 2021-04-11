@@ -69,13 +69,13 @@ int main() {
     bit_reverse(x_r, x_i);
 
     // 結果をファイルに出力
-    ofstream dft_ofs("dft.xlsx");
+    ofstream dft_ofs("dft.csv");
     for (int i = 0; i < N; i++) {
         dft_ofs << x_r[i] << "," << x_i[i] << endl;
     }
     dft_ofs.close();
 
-    ofstream fft_ofs("fft.xlsx");
+    ofstream fft_ofs("fft.csv");
     for (int i = 0; i < N; i++) {
         fft_ofs << x_r[i] << "," << x_i[i] << endl;
     }
