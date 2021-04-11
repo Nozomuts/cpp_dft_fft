@@ -1,5 +1,4 @@
 #include <chrono>
-#include <fstream>
 #include <iostream> // for cout
 
 #define N 64            // 分割数
@@ -11,7 +10,22 @@
 using namespace std;    // cout, endl, swap, ios, complex
 using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
 
-void dft(double x_r[N], double x_i[N], double *dft_r, double *dft_i) {
+// ビット反転並べ替え
+void bit_reverse(double x_r[N], double x_i[N]) {
+    for (int i = 0, j = 1; j < N - 1; j++) {
+        for (int k = N >> 1; k > (i ^= k); k >>= 1)
+            ;
+        if (i < j) {
+            swap(x_r[i], x_r[j]); // 入れ替え
+            swap(x_i[i], x_i[j]);
+        }
+    }
+}
+
+// 離散フーリエ変換
+void dft(double x_r[N], double x_i[N]) {
+    double dft_r[N], dft_i[N];
+
     for (int k = 0; k < N; k++) {
         for (int n = 0; n < N; n++) {
             dft_r[k] += x_r[n] * cos(2 * M_PI / N * k * n) + x_i[n] * sin(2 * M_PI / N * k * n);
@@ -20,7 +34,8 @@ void dft(double x_r[N], double x_i[N], double *dft_r, double *dft_i) {
     }
 }
 
-void fft(double *x_r, double *x_i) {
+// 高速フーリエ変換
+void fft(double x_r[N], double x_i[N]) {
     int m = N;
     while (m > 1) {
         for (int i = 0; i < N / m; i++) {
@@ -37,22 +52,11 @@ void fft(double *x_r, double *x_i) {
         }
         m /= 2;
     }
-}
-
-// ビット反転並べ替え
-void bit_reverse(double *x_r, double *x_i) {
-    for (int i = 0, j = 1; j < N - 1; j++) {
-        for (int k = N >> 1; k > (i ^= k); k >>= 1)
-            ;
-        if (i < j) {
-            swap(x_r[i], x_r[j]); // 入れ替え
-            swap(x_i[i], x_i[j]);
-        }
-    }
+    bit_reverse(x_r, x_i);
 }
 
 int main() {
-    double x_r[N], x_i[N], dft_r[N], dft_i[N]; // x_r,x_iは元データ兼fftのデータ
+    double x_r[N], x_i[N];
     double sum = 0;
     system_clock::time_point start, end;
 
@@ -63,31 +67,24 @@ int main() {
         x_i[i] = 0;
     }
 
-    dft(x_r, x_i, dft_r, dft_i);
-
-    fft(x_r, x_i);
-    bit_reverse(x_r, x_i);
-
-    // 結果をファイルに出力
-    ofstream dft_ofs("dft.xlsx");
-    for (int i = 0; i < N; i++) {
-        dft_ofs << x_r[i] << "," << x_i[i] << endl;
+    start = system_clock::now(); // 計測スタート時刻を保存
+    for (int i = 0; i < N; i++) { // N回繰り返して平均を求める
+        dft(x_r, x_i);
     }
-    dft_ofs.close();
+    end = system_clock::now(); // 計測終了時刻を保存
+    // 要した時間を計算
+    double dft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0) / N;
 
-    ofstream fft_ofs("fft.xlsx");
+    start = system_clock::now();
     for (int i = 0; i < N; i++) {
-        fft_ofs << x_r[i] << "," << x_i[i] << endl;
+        fft(x_r, x_i);
     }
-    fft_ofs.close();
+    end = system_clock::now();
+    double fft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0) / N;
 
-    for (int i = 0; i < N; i++) {
-        // √(実部^2+虚部^2)^2 (差分の2乗)
-        sum += ((x_r[i] - dft_r[i]) * (x_r[i] - dft_r[i]) + (x_i[i] - dft_i[i]) * (x_i[i] - dft_i[i]));
-    }
-
-    // dftとfftの結果の比較(差分の2乗平均の平方根)
-    cout << sqrt(sum / N) << endl;
+    // 要した時間をミリ秒（1/1000秒）に変換して表示
+    cout << "DFT: " << dft_time << " ms" << endl;
+    cout << "FFT: " << fft_time << " ms" << endl;
 
     return 0;
 }
