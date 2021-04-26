@@ -71,7 +71,7 @@ int main() {
     // 結果をファイルに出力
     ofstream dft_ofs("dft.csv");
     for (int i = 0; i < N; i++) {
-        dft_ofs << x_r[i] << "," << x_i[i] << endl;
+        dft_ofs << dft_r[i] << "," << dft_i[i] << endl;
     }
     dft_ofs.close();
 
