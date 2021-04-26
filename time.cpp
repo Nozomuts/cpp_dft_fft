@@ -10,6 +10,32 @@
 using namespace std;    // cout, endl, swap, ios, complex
 using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
 
+double sin_table[] = {
+    0,       0.0980171, 0.19509,  0.290285, 0.382683, 0.471397, 0.55557,  0.634393, 0.707107,
+    0.77301, 0.83147,   0.881921, 0.92388,  0.95694,  0.980785, 0.995185, 1,
+};
+
+double Sin(int i, int _N) {
+    int n = i % _N;
+    if (n <= _N / 4) {
+        return sin_table[n];
+    } else if (n <= _N / 2) {
+        return sin_table[_N / 2 - n];
+    } else if (n <= 3 * _N / 4) {
+        return -sin_table[n - _N / 2];
+    } else if (n <= _N) {
+        return -sin_table[_N - n];
+    } else {
+        printf("Error!");
+        return -1;
+    }
+}
+
+double Cos(int i, int _N) {
+    i += N / 4;
+    return Sin(i, _N);
+}
+
 // ビット反転並べ替え
 void bit_reverse(double x_r[N], double x_i[N]) {
     for (int i = 0, j = 1; j < N - 1; j++) {
@@ -46,8 +72,8 @@ void fft(double x_r[N], double x_i[N]) {
                 double b_i = x_i[i * m + j + m / 2];
                 x_r[i * m + j] = a_r + b_r;
                 x_i[i * m + j] = a_i + b_i;
-                x_r[i * m + j + m / 2] = (a_r - b_r) * cos(2 * M_PI / m * j) + (a_i - b_i) * sin(2 * M_PI / m * j);
-                x_i[i * m + j + m / 2] = (a_r - b_r) * (-sin(2 * M_PI / m * j)) + (a_i - b_i) * cos(2 * M_PI / m * j);
+                x_r[i * m + j + m / 2] = (a_r - b_r) * Cos(j, m) + (a_i - b_i) * Sin(j, m);
+                x_i[i * m + j + m / 2] = (a_r - b_r) * (-Sin(j, m)) + (a_i - b_i) * Cos(j, m);
             }
         }
         m /= 2;
