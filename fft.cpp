@@ -11,6 +11,7 @@ using namespace std; // cout, endl, swap, ios, complex
 
 double sin_table[N / 4 + 1];
 
+// テーブルを用いたsin関数
 double use_table_sin(int n) {
     n %= N;
     if (n <= N / 4) {
@@ -27,11 +28,13 @@ double use_table_sin(int n) {
     }
 }
 
+// テーブルを用いたcos関数
 double use_table_cos(int n) {
     n += N / 4;
     return use_table_sin(n);
 }
 
+// 高速フーリエ変換
 void fft(double *x_r, double *x_i) {
     int m = N;
     while (m > 1) {
@@ -65,11 +68,13 @@ void bit_reverse(double *x_r, double *x_i) {
     }
 }
 
+// 加法定理でテーブルを求める
 void add_sin(int i) {
     sin_table[N / 4 - i] = use_table_cos(i - 1) * use_table_cos(1) - use_table_sin(1) * use_table_sin(i - 1);
     sin_table[i + 1] = use_table_sin(i) * use_table_cos(1) + use_table_cos(i) * use_table_sin(1);
 }
 
+// テーブル作成
 void create_table() {
     sin_table[0] = 0;
     sin_table[1] = sin(2 * M_PI / N);
@@ -92,6 +97,7 @@ int main() {
         x_i[i] = 0;
     }
 
+    // テーブル作成
     create_table();
 
     fft(x_r, x_i);
