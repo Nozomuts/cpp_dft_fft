@@ -11,7 +11,7 @@ using namespace std; // cout, endl, swap, ios, complex
 
 double sin_table[N / 4 + 1];
 
-double Sin(int n) {
+double use_table_sin(int n) {
     n %= N;
     if (n <= N / 4) {
         return sin_table[n];
@@ -27,9 +27,9 @@ double Sin(int n) {
     }
 }
 
-double Cos(int n) {
+double use_table_cos(int n) {
     n += N / 4;
-    return Sin(n);
+    return use_table_sin(n);
 }
 
 void fft(double *x_r, double *x_i) {
@@ -43,8 +43,10 @@ void fft(double *x_r, double *x_i) {
                 double b_i = x_i[i * m + j + m / 2];
                 x_r[i * m + j] = a_r + b_r;
                 x_i[i * m + j] = a_i + b_i;
-                x_r[i * m + j + m / 2] = (a_r - b_r) * Cos(N / m * j) + (a_i - b_i) * Sin(N / m * j);
-                x_i[i * m + j + m / 2] = (a_r - b_r) * (-Sin(N / m * j)) + (a_i - b_i) * Cos(N / m * j);
+                x_r[i * m + j + m / 2] =
+                    (a_r - b_r) * use_table_cos(N / m * j) + (a_i - b_i) * use_table_sin(N / m * j);
+                x_i[i * m + j + m / 2] =
+                    (a_r - b_r) * (-use_table_sin(N / m * j)) + (a_i - b_i) * use_table_cos(N / m * j);
             }
         }
         m /= 2;
@@ -63,9 +65,19 @@ void bit_reverse(double *x_r, double *x_i) {
     }
 }
 
+void add_sin(int i) {
+    sin_table[N / 4 - i] = use_table_cos(i - 1) * use_table_cos(1) - use_table_sin(1) * use_table_sin(i - 1);
+    sin_table[i + 1] = use_table_sin(i) * use_table_cos(1) + use_table_cos(i) * use_table_sin(1);
+}
+
 void create_table() {
-    for (int i = 0; i <= N / 4; i++) {
-        sin_table[i] = sin(2 * M_PI / N * i);
+    sin_table[0] = 0;
+    sin_table[1] = sin(2 * M_PI / N);
+    sin_table[N / 4 - 1] = sin(2 * M_PI / N * (N / 4 - 1));
+    sin_table[N / 4] = 1;
+
+    for (int i = 1; i < N / 4; i++) {
+        add_sin(i);
     }
 }
 

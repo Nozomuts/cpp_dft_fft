@@ -8,7 +8,7 @@ using namespace std; // cout, endl, swap, ios, complex
 
 double sin_table[N / 4 + 1];
 
-double Sin(int n) {
+double use_table_sin(int n) {
     if (n > N / 4) {
         n %= N;
     }
@@ -26,14 +26,14 @@ double Sin(int n) {
     }
 }
 
-double Cos(int n) {
+double use_table_cos(int n) {
     n += N / 4;
-    return Sin(n);
+    return use_table_sin(n);
 }
 
-void add(int i) {
-    sin_table[N / 4 - i] = Cos(i - 1) * Cos(1) - Sin(1) * Sin(i - 1);
-    sin_table[i + 1] = Sin(i) * Cos(1) + Cos(i) * Sin(1);
+void add_sin(int i) {
+    sin_table[N / 4 - i] = use_table_cos(i - 1) * use_table_cos(1) - use_table_sin(1) * use_table_sin(i - 1);
+    sin_table[i + 1] = use_table_sin(i) * use_table_cos(1) + use_table_cos(i) * use_table_sin(1);
     cout << sin_table[i + 1] << endl;
 }
 
@@ -44,7 +44,7 @@ int main() {
     sin_table[N / 4] = 1;
 
     for (int i = 1; i < N / 4; i++) {
-        add(i);
+        add_sin(i);
     }
 
     ofstream sin_ofs("sin.csv");
