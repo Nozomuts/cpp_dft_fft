@@ -48,7 +48,7 @@ void bit_reverse(double x_r[N], double x_i[N]) {
     }
 }
 
-// 高速フーリエ変換
+// 高速フーリエ変換(テーブル無し)
 void fft(double x_r[N], double x_i[N]) {
     int m = N;
     while (m > 1) {
@@ -69,6 +69,7 @@ void fft(double x_r[N], double x_i[N]) {
     bit_reverse(x_r, x_i);
 }
 
+// 高速フーリエ変換(テーブル有り)
 void use_table_fft(double x_r[N], double x_i[N]) {
     int m = N;
     while (m > 1) {
@@ -117,8 +118,8 @@ int main() {
     double use_table_fft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0) / (N * N);
 
     // 要した時間をミリ秒（1/1000秒）に変換して表示
-    cout << "FFT(テーブルなし): " << fft_time << " ms" << endl;
-    cout << "FFT(テーブルあり): " << use_table_fft_time << " ms" << endl;
+    cout << "FFT(テーブル無し): " << fft_time << " ms" << endl;
+    cout << "FFT(テーブル有り): " << use_table_fft_time << " ms" << endl;
 
     return 0;
 }
