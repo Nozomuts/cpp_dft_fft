@@ -9,30 +9,27 @@
 
 using namespace std; // cout, endl, swap, ios, complex
 
-double sin_table[] = {
-    0,       0.0980171, 0.19509,  0.290285, 0.382683, 0.471397, 0.55557,  0.634393, 0.707107,
-    0.77301, 0.83147,   0.881921, 0.92388,  0.95694,  0.980785, 0.995185, 1,
-};
+double sin_table[N / 4 + 1];
 
-double Sin(int i, int m) {
-    int n = i % m;
-    if (n <= m / 4) {
+double Sin(int n) {
+    n %= N;
+    if (n <= N / 4) {
         return sin_table[n];
-    } else if (n <= m / 2) {
-        return sin_table[m / 2 - n];
-    } else if (n <= 3 * m / 4) {
-        return -sin_table[n - m / 2];
-    } else if (n <= m) {
-        return -sin_table[m - n];
+    } else if (n <= N / 2) {
+        return sin_table[N / 2 - n];
+    } else if (n <= 3 * N / 4) {
+        return -sin_table[n - N / 2];
+    } else if (n <= N) {
+        return -sin_table[N - n];
     } else {
         printf("Error!");
         return -1;
     }
 }
 
-double Cos(int i, int m) {
-    i += m / 4;
-    return Sin(i, m);
+double Cos(int n) {
+    n += N / 4;
+    return Sin(n);
 }
 
 void fft(double *x_r, double *x_i) {
@@ -46,8 +43,8 @@ void fft(double *x_r, double *x_i) {
                 double b_i = x_i[i * m + j + m / 2];
                 x_r[i * m + j] = a_r + b_r;
                 x_i[i * m + j] = a_i + b_i;
-                x_r[i * m + j + m / 2] = (a_r - b_r) * Cos(j, m) + (a_i - b_i) * Sin(j, m);
-                x_i[i * m + j + m / 2] = (a_r - b_r) * (-Sin(j, m)) + (a_i - b_i) * Cos(j, m);
+                x_r[i * m + j + m / 2] = (a_r - b_r) * Cos(N / m * j) + (a_i - b_i) * Sin(N / m * j);
+                x_i[i * m + j + m / 2] = (a_r - b_r) * (-Sin(N / m * j)) + (a_i - b_i) * Cos(N / m * j);
             }
         }
         m /= 2;
@@ -66,6 +63,12 @@ void bit_reverse(double *x_r, double *x_i) {
     }
 }
 
+void create_table() {
+    for (int i = 0; i <= N / 4; i++) {
+        sin_table[i] = sin(2 * M_PI / N * i);
+    }
+}
+
 int main() {
     double x_r[N], x_i[N], dft_r[N], dft_i[N]; // x_r,x_iは元データ兼fftのデータ
     double sum = 0;
@@ -76,6 +79,8 @@ int main() {
         x_r[i] = A * sin(2 * M_PI * F0 * i / Fs + phi); // t = i / Fs
         x_i[i] = 0;
     }
+
+    create_table();
 
     fft(x_r, x_i);
     bit_reverse(x_r, x_i);
