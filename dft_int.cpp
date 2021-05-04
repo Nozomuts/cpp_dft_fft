@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream> // for cout
 
-#define N 64            // 分割数
+#define N 64    // 分割数
 #define Fs 8000 // サンプリング周波数
 #define A 1     // 振幅
 #define F0 440  // 周波数
@@ -12,8 +12,8 @@ using namespace std;    // cout, endl, swap, ios, complex
 using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
 
 int sin_table[] = {
-    0,       98017, 195090,  290285, 382683, 471397, 555570,  634393, 707107,
-    773010, 831470,   881921, 923880,  956940,  980785, 995185, 1000000,
+    0,      9802,  19509, 29029, 38268, 47140, 55557, 63439,  70711,
+    77301, 83147, 88192, 92388, 95694, 98079, 99519, 100000,
 };
 
 int use_table_sin(int i) {
@@ -37,7 +37,7 @@ int use_table_cos(int i) {
     return use_table_sin(i);
 }
 
-void dft(double x_r[N], double x_i[N], double *dft_r, double *dft_i) {
+void dft(int x_r[N], int x_i[N], int *dft_r, int *dft_i) {
     for (int k = 0; k < N; k++) {
         for (int n = 0; n < N; n++) {
             dft_r[k] += x_r[n] * use_table_cos(k * n) + x_i[n] * use_table_sin(k * n);
@@ -47,12 +47,13 @@ void dft(double x_r[N], double x_i[N], double *dft_r, double *dft_i) {
 }
 
 int main() {
-    double x_r[N], x_i[N], dft_r[N], dft_i[N]; // x_r,x_iは元データ兼fftのデータ
+    int x_r[N], x_i[N];
+    int dft_r[N], dft_i[N]; // x_r,x_iは元データ兼fftのデータ
 
     // 元データ作成
     for (int i = 0; i < N; i++) {
         // x(t) = A * sin(2 * pi * F0 * t + phi) ( 0 <= t < 0.008 )
-        x_r[i] = A * sin(2 * M_PI * F0 * i / Fs + phi) * 1000000; // t = i / Fs
+        x_r[i] = A * sin(2 * M_PI * F0 * i / Fs + phi) * 1000; // t = i / Fs
         x_i[i] = 0;
     }
 
