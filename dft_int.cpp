@@ -1,4 +1,5 @@
 #include <chrono>
+#include <fstream>
 #include <iostream> // for cout
 
 #define N 64    // 分割数
@@ -9,9 +10,7 @@
 
 using namespace std; // cout, endl, swap, ios, complex
 
-int sin_table[] = {
-    0, 9802, 19509, 29029, 38268, 47140, 55557, 63439, 70711, 77301, 83147, 88192, 92388, 95694, 98079, 99519, 100000,
-};
+int sin_table[N / 4 + 1];
 
 int use_table_sin(int i) {
     int n = i % N;
@@ -43,6 +42,21 @@ void dft(int x_r[N], int x_i[N], int *dft_r, int *dft_i) {
     }
 }
 
+// 加法定理でテーブルを求める
+// void add_sin(int i) {
+//     sin_table[N / 4 - i] = use_table_cos(i - 1) * use_table_cos(1) - use_table_sin(1) * use_table_sin(i - 1);
+//     sin_table[i + 1] = use_table_sin(i) * use_table_cos(1) + use_table_cos(i) * use_table_sin(1);
+// }
+
+// テーブル作成
+void create_table() {
+    sin_table[0] = 0;
+
+    for (int i = 1; i <= N / 4; i++) {
+        sin_table[i] = sin(2 * M_PI / N * i) * 100000;
+    }
+}
+
 int main() {
     int x_r[N], x_i[N], dft_r[N], dft_i[N]; // x_r,x_iは元データ兼fftのデータ
 
@@ -53,7 +67,21 @@ int main() {
         x_i[i] = 0;
     }
 
+    create_table();
+    for (int i = 0; i < N; i++)
+    {
+       cout << use_table_sin(i) << endl;
+    }
+    
+
     dft(x_r, x_i, dft_r, dft_i);
+
+    // 結果をファイルに出力
+    ofstream dft_ofs("dft_int.csv");
+    for (int i = 0; i < N; i++) {
+        dft_ofs << dft_r[i] << "," << dft_i[i] << endl;
+    }
+    dft_ofs.close();
 
     return 0;
 }
