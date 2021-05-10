@@ -1,5 +1,4 @@
 #include <chrono>
-#include <fstream>
 #include <iostream> // for cout
 
 #define N 64    // 分割数
@@ -8,12 +7,10 @@
 #define F0 440  // 周波数
 #define phi 0   // 初期位相
 
-using namespace std;    // cout, endl, swap, ios, complex
-using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
+using namespace std; // cout, endl, swap, ios, complex
 
 int sin_table[] = {
-    0,      9802,  19509, 29029, 38268, 47140, 55557, 63439,  70711,
-    77301, 83147, 88192, 92388, 95694, 98079, 99519, 100000,
+    0, 9802, 19509, 29029, 38268, 47140, 55557, 63439, 70711, 77301, 83147, 88192, 92388, 95694, 98079, 99519, 100000,
 };
 
 int use_table_sin(int i) {
@@ -47,8 +44,7 @@ void dft(int x_r[N], int x_i[N], int *dft_r, int *dft_i) {
 }
 
 int main() {
-    int x_r[N], x_i[N];
-    int dft_r[N], dft_i[N]; // x_r,x_iは元データ兼fftのデータ
+    int x_r[N], x_i[N], dft_r[N], dft_i[N]; // x_r,x_iは元データ兼fftのデータ
 
     // 元データ作成
     for (int i = 0; i < N; i++) {
@@ -58,13 +54,6 @@ int main() {
     }
 
     dft(x_r, x_i, dft_r, dft_i);
-
-    // 結果をファイルに出力
-    ofstream dft_ofs("dft_int.csv");
-    for (int i = 0; i < N; i++) {
-        dft_ofs << dft_r[i] << "," << dft_i[i] << endl;
-    }
-    dft_ofs.close();
 
     return 0;
 }

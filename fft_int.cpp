@@ -1,19 +1,22 @@
+#include <chrono>
 #include <fstream>
 #include <iostream> // for cout
 
-#define N 64            // 分割数
+#define N 64    // 分割数
 #define Fs 8000 // サンプリング周波数
 #define A 1     // 振幅
 #define F0 440  // 周波数
 #define phi 0   // 初期位相
 
-using namespace std; // cout, endl, swap, ios, complex
+using namespace std;    // cout, endl, swap, ios, complex
+using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
 
-double sin_table[N / 4 + 1];
+int sin_table[] = {
+    0, 9802, 19509, 29029, 38268, 47140, 55557, 63439, 70711, 77301, 83147, 88192, 92388, 95694, 98079, 99519, 100000,
+};
 
-// テーブルを用いたsin関数
-double use_table_sin(int n) {
-    n %= N;
+int use_table_sin(int i) {
+    int n = i % N;
     if (n <= N / 4) {
         return sin_table[n];
     } else if (n <= N / 2) {
@@ -28,22 +31,21 @@ double use_table_sin(int n) {
     }
 }
 
-// テーブルを用いたcos関数
-double use_table_cos(int n) {
-    n += N / 4;
-    return use_table_sin(n);
+int use_table_cos(int i) {
+    i += N / 4;
+    return use_table_sin(i);
 }
 
 // 高速フーリエ変換
-void fft(double *x_r, double *x_i) {
+void fft(int *x_r, int *x_i) {
     int m = N;
     while (m > 1) {
         for (int i = 0; i < N / m; i++) {
             for (int j = 0; j < m / 2; j++) {
-                double a_r = x_r[i * m + j];
-                double a_i = x_i[i * m + j];
-                double b_r = x_r[i * m + j + m / 2];
-                double b_i = x_i[i * m + j + m / 2];
+                int a_r = x_r[i * m + j];
+                int a_i = x_i[i * m + j];
+                int b_r = x_r[i * m + j + m / 2];
+                int b_i = x_i[i * m + j + m / 2];
                 x_r[i * m + j] = a_r + b_r;
                 x_i[i * m + j] = a_i + b_i;
                 x_r[i * m + j + m / 2] =
@@ -57,7 +59,7 @@ void fft(double *x_r, double *x_i) {
 }
 
 // ビット反転並べ替え
-void bit_reverse(double *x_r, double *x_i) {
+void bit_reverse(int *x_r, int *x_i) {
     for (int i = 0, j = 1; j < N; j++) {
         for (int k = N >> 1; k > (i ^= k); k >>= 1)
             ;
@@ -68,41 +70,21 @@ void bit_reverse(double *x_r, double *x_i) {
     }
 }
 
-// 加法定理でテーブルを求める
-void add_sin(int i) {
-    sin_table[N / 4 - i] = use_table_cos(i - 1) * use_table_cos(1) - use_table_sin(1) * use_table_sin(i - 1);
-    sin_table[i + 1] = use_table_sin(i) * use_table_cos(1) + use_table_cos(i) * use_table_sin(1);
-}
-
-// テーブル作成
-void create_table() {
-    sin_table[0] = 0;
-    sin_table[1] = sin(2 * M_PI / N);
-    sin_table[N / 4 - 1] = sin(2 * M_PI / N * (N / 4 - 1));
-    sin_table[N / 4] = 1;
-
-    for (int i = 1; i < N / 4; i++) {
-        add_sin(i);
-    }
-}
-
 int main() {
-    double x_r[N], x_i[N], dft_r[N], dft_i[N]; // x_r,x_iは元データ兼fftのデータ
+    int x_r[N], x_i[N];
 
     // 元データ作成
     for (int i = 0; i < N; i++) {
         // x(t) = A * sin(2 * pi * F0 * t + phi) ( 0 <= t < 0.008 )
-        x_r[i] = A * sin(2 * M_PI * F0 * i / Fs + phi); // t = i / Fs
+        x_r[i] = A * sin(2 * M_PI * F0 * i / Fs + phi) * 1000; // t = i / Fs
         x_i[i] = 0;
     }
-
-    // テーブル作成
-    create_table();
 
     fft(x_r, x_i);
     bit_reverse(x_r, x_i);
 
-    ofstream fft_ofs("fft_exam.csv");
+    // 結果をファイルに出力
+    ofstream fft_ofs("fft_int.csv");
     for (int i = 0; i < N; i++) {
         fft_ofs << x_r[i] << "," << x_i[i] << endl;
     }
