@@ -102,7 +102,8 @@ int main() {
     fft(x_r, x_i);
     bit_reverse(x_r, x_i);
 
-    ofstream fft_ofs("fft_exam.csv");
+    // 結果をファイルに書き出し
+    ofstream fft_ofs("fft.csv");
     for (int i = 0; i < N; i++) {
         fft_ofs << x_r[i] << "," << x_i[i] << endl;
     }
