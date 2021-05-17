@@ -11,9 +11,7 @@
 using namespace std;    // cout, endl, swap, ios, complex
 using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
 
-int sin_table[] = {
-    0, 9802, 19509, 29029, 38268, 47140, 55557, 63439, 70711, 77301, 83147, 88192, 92388, 95694, 98079, 99519, 100000,
-};
+int sin_table[N / 4 + 1];
 
 int use_table_sin(int i) {
     int n = i % N;
@@ -34,6 +32,21 @@ int use_table_sin(int i) {
 int use_table_cos(int i) {
     i += N / 4;
     return use_table_sin(i);
+}
+
+// 加法定理でテーブルを求める
+// void add_sin(int i) {
+//     sin_table[N / 4 - i] = use_table_cos(i - 1) * use_table_cos(1) - use_table_sin(1) * use_table_sin(i - 1);
+//     sin_table[i + 1] = use_table_sin(i) * use_table_cos(1) + use_table_cos(i) * use_table_sin(1);
+// }
+
+// テーブル作成
+void create_table() {
+    sin_table[0] = 0;
+
+    for (int i = 1; i <= N / 4; i++) {
+        sin_table[i] = sin(2 * M_PI / N * i) * 100000;
+    }
 }
 
 // 高速フーリエ変換
@@ -79,6 +92,8 @@ int main() {
         x_r[i] = A * sin(2 * M_PI * F0 * i / Fs + phi) * 1000; // t = i / Fs
         x_i[i] = 0;
     }
+
+    create_table();
 
     fft(x_r, x_i);
     bit_reverse(x_r, x_i);
