@@ -1,7 +1,7 @@
 #include <chrono>
 #include <iostream> // for cout
 
-#define N 1024          // 分割数
+#define N 256            // 分割数
 #define Fs (double)8000 // サンプリング周波数
 #define A (double)1     // 振幅
 #define F0 (double)440  // 周波数
@@ -12,9 +12,13 @@ using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
 
 double sin_table[N / 4 + 1];
 double add_sin_table[4];
+double sini, cosi;
 
 double use_table_add_sin(int n) {
     n %= N;
+    sini = 0;
+    cosi = 1;
+
     if (n == 0) {
         return add_sin_table[0];
     } else if (n == 1) {
@@ -24,17 +28,29 @@ double use_table_add_sin(int n) {
     } else if (n == N / 4) {
         return add_sin_table[3];
     } else if (n <= N / 4) {
-        return use_table_add_sin(n - 1) * use_table_add_sin(N / 4 + 1) +
-               use_table_add_sin(n - 1 + N / 4) * use_table_add_sin(1);
+        for (int i = 1; i < n; i++) {
+            sini = sini * add_sin_table[2] + cosi * add_sin_table[1];
+            cosi = cosi * add_sin_table[2] + sini * add_sin_table[1];
+        }
+        return sini;
     } else if (n <= N / 2) {
-        return use_table_add_sin(N / 2 - n - 1) * use_table_add_sin(N / 4 + 1) +
-               use_table_add_sin(N / 2 - n - 1 + N / 4) * use_table_add_sin(1);
+        for (int i = 1; i < N / 2 - n; i++) {
+            sini = sini * add_sin_table[2] + cosi * add_sin_table[1];
+            cosi = cosi * add_sin_table[2] + sini * add_sin_table[1];
+        }
+        return sini;
     } else if (n <= 3 * N / 4) {
-        return -(use_table_add_sin(n - N / 2 - 1) * use_table_add_sin(N / 4 + 1) +
-                 use_table_add_sin(n - N / 2 - 1 + N / 4) * use_table_add_sin(1));
+        for (int i = 1; i < n - N / 2; i++) {
+            sini = sini * add_sin_table[2] + cosi * add_sin_table[1];
+            cosi = cosi * add_sin_table[2] + sini * add_sin_table[1];
+        }
+        return -sini;
     } else if (n <= N) {
-        return -(use_table_add_sin(N - n - 1) * use_table_add_sin(N / 4 + 1) +
-                 use_table_add_sin(N - n - 1 + N / 4) * use_table_add_sin(1));
+        for (int i = 1; i < N - n; i++) {
+            sini = sini * add_sin_table[2] + cosi * add_sin_table[1];
+            cosi = cosi * add_sin_table[2] + sini * add_sin_table[1];
+        }
+        return -sini;
     } else {
         printf("Error!");
         return -1;
@@ -44,20 +60,6 @@ double use_table_add_sin(int n) {
 double use_table_add_cos(int n) {
     n += N / 4;
     return use_table_add_sin(n);
-}
-
-double add_sin(int i) {
-    if (i == 0) {
-        return add_sin_table[0];
-    } else if (i == 1) {
-        return add_sin_table[1];
-    } else if (i == N / 4 - 1) {
-        return add_sin_table[2];
-    } else if (i == N / 4) {
-        return add_sin_table[3];
-    } else {
-        return use_table_add_sin(i - 1) * use_table_add_cos(1) + use_table_add_cos(i - 1) * use_table_add_sin(1);
-    }
 }
 
 double use_table_sin(int n) {
@@ -128,8 +130,10 @@ void add_sin_fft(double x_r[N], double x_i[N]) {
                 double b_i = x_i[i * m + j + m / 2];
                 x_r[i * m + j] = a_r + b_r;
                 x_i[i * m + j] = a_i + b_i;
-                x_r[i * m + j + m / 2] = (a_r - b_r) * use_table_add_cos(N / m * j) + (a_i - b_i) * use_table_add_sin(N / m * j);
-                x_i[i * m + j + m / 2] = (a_r - b_r) * (-use_table_add_sin(N / m * j)) + (a_i - b_i) * use_table_add_cos(N / m * j);
+                x_r[i * m + j + m / 2] =
+                    (a_r - b_r) * use_table_add_cos(N / m * j) + (a_i - b_i) * use_table_add_sin(N / m * j);
+                x_i[i * m + j + m / 2] =
+                    (a_r - b_r) * (-use_table_add_sin(N / m * j)) + (a_i - b_i) * use_table_add_cos(N / m * j);
             }
         }
         m /= 2;
