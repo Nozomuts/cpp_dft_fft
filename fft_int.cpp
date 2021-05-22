@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream> // for cout
 
-#define N 64    // 分割数
+#define N 256    // 分割数
 #define Fs 8000 // サンプリング周波数
 #define A 1     // 振幅
 #define F0 440  // 周波数
@@ -34,18 +34,12 @@ int use_table_cos(int i) {
     return use_table_sin(i);
 }
 
-// 加法定理でテーブルを求める
-// void add_sin(int i) {
-//     sin_table[N / 4 - i] = use_table_cos(i - 1) * use_table_cos(1) - use_table_sin(1) * use_table_sin(i - 1);
-//     sin_table[i + 1] = use_table_sin(i) * use_table_cos(1) + use_table_cos(i) * use_table_sin(1);
-// }
-
 // テーブル作成
 void create_table() {
     sin_table[0] = 0;
 
     for (int i = 1; i <= N / 4; i++) {
-        sin_table[i] = sin(2 * M_PI / N * i) * 100000;
+        sin_table[i] = sin(2 * M_PI / N * i) * 10000;
     }
 }
 
@@ -62,9 +56,9 @@ void fft(int *x_r, int *x_i) {
                 x_r[i * m + j] = a_r + b_r;
                 x_i[i * m + j] = a_i + b_i;
                 x_r[i * m + j + m / 2] =
-                    (a_r - b_r) * use_table_cos(N / m * j) + (a_i - b_i) * use_table_sin(N / m * j);
+                    (a_r - b_r) * use_table_cos(N / m * j) / 10000 + (a_i - b_i) * use_table_sin(N / m * j) / 10000;
                 x_i[i * m + j + m / 2] =
-                    (a_r - b_r) * (-use_table_sin(N / m * j)) + (a_i - b_i) * use_table_cos(N / m * j);
+                    (a_r - b_r) * (-use_table_sin(N / m * j)) / 10000 + (a_i - b_i) * use_table_cos(N / m * j) / 10000;
             }
         }
         m /= 2;
@@ -89,7 +83,7 @@ int main() {
     // 元データ作成
     for (int i = 0; i < N; i++) {
         // x(t) = A * sin(2 * pi * F0 * t + phi) ( 0 <= t < 0.008 )
-        x_r[i] = A * sin(2 * M_PI * F0 * i / Fs + phi) * 1000; // t = i / Fs
+        x_r[i] = A * sin(2 * M_PI * F0 * i / Fs + phi) * 10000; // t = i / Fs
         x_i[i] = 0;
     }
 
@@ -101,7 +95,7 @@ int main() {
     // 結果をファイルに出力
     ofstream fft_ofs("fft_int.csv");
     for (int i = 0; i < N; i++) {
-        fft_ofs << x_r[i] << "," << x_i[i] << endl;
+        fft_ofs << x_r[i] / (double)10000 << "," << x_i[i] / (double)10000 << endl;
     }
     fft_ofs.close();
 
