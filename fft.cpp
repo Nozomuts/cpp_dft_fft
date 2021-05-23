@@ -1,7 +1,7 @@
 #include <fstream>
 #include <iostream> // for cout
 
-#define N 256            // 分割数
+#define N 256   // 分割数
 #define Fs 8000 // サンプリング周波数
 #define A 1     // 振幅
 #define F0 440  // 周波数
