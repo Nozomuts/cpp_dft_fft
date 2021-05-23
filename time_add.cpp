@@ -1,7 +1,7 @@
 #include <chrono>
 #include <iostream> // for cout
 
-#define N 1024           // 分割数
+#define N 64           // 分割数
 #define Fs (double)8000 // サンプリング周波数
 #define A (double)1     // 振幅
 #define F0 (double)440  // 周波数

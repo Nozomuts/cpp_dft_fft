@@ -2,11 +2,12 @@
 #include <fstream>
 #include <iostream> // for cout
 
-#define N 64    // 分割数
+#define N 256    // 分割数
 #define Fs 8000 // サンプリング周波数
 #define A 1     // 振幅
 #define F0 440  // 周波数
 #define phi 0   // 初期位相
+#define DIVISOR 1000
 
 using namespace std;    // cout, endl, swap, ios, complex
 using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
@@ -63,7 +64,7 @@ void create_table_int() {
     sin_table_int[0] = 0;
 
     for (int i = 1; i <= N / 4; i++) {
-        sin_table_int[i] = sin(2 * M_PI / N * i) * 10000;
+        sin_table_int[i] = sin(2 * M_PI / N * i) * DIVISOR;
     }
 }
 
@@ -110,10 +111,10 @@ void fft_int(int *x_r, int *x_i) {
                 int b_i = x_i[i * m + j + m / 2];
                 x_r[i * m + j] = a_r + b_r;
                 x_i[i * m + j] = a_i + b_i;
-                x_r[i * m + j + m / 2] = (a_r - b_r) * use_table_cos_int(N / m * j) / 10000 +
-                                         (a_i - b_i) * use_table_sin_int(N / m * j) / 10000;
-                x_i[i * m + j + m / 2] = (a_r - b_r) * (-use_table_sin_int(N / m * j)) / 10000 +
-                                         (a_i - b_i) * use_table_cos_int(N / m * j) / 10000;
+                x_r[i * m + j + m / 2] = (a_r - b_r) * use_table_cos_int(N / m * j) / DIVISOR +
+                                         (a_i - b_i) * use_table_sin_int(N / m * j) / DIVISOR;
+                x_i[i * m + j + m / 2] = (a_r - b_r) * (-use_table_sin_int(N / m * j)) / DIVISOR +
+                                         (a_i - b_i) * use_table_cos_int(N / m * j) / DIVISOR;
             }
         }
         m /= 2;
@@ -147,11 +148,12 @@ void bit_reverse(double *x_r, double *x_i) {
 int main() {
     int x_r[N], x_i[N];
     double y_r[N], y_i[N]; // x_r,x_iは元データ兼fftのデータ
+    double sum = 0;
 
     // 元データ作成
     for (int i = 0; i < N; i++) {
         // x(t) = A * sin(2 * pi * F0 * t + phi) ( 0 <= t < 0.008 )
-        x_r[i] = A * sin(2 * M_PI * F0 * i / Fs + phi) * 10000; // t = i / Fs
+        x_r[i] = A * sin(2 * M_PI * F0 * i / Fs + phi) * DIVISOR; // t = i / Fs
         x_i[i] = 0;
         y_r[i] = A * sin(2 * M_PI * F0 * i / Fs + phi); // t = i / Fs
         y_i[i] = 0;
@@ -168,9 +170,18 @@ int main() {
     // 結果をファイルに出力
     ofstream fft_ofs("int.csv");
     for (int i = 0; i < N; i++) {
-        fft_ofs << y_r[i] - x_r[i] / (double)10000 << "," << y_i[i] - x_i[i] / (double)10000 << endl;
+        fft_ofs << y_r[i] - x_r[i] / (double)DIVISOR << "," << y_i[i] - x_i[i] / (double)DIVISOR << endl;
     }
     fft_ofs.close();
+
+    for (int i = 0; i < N; i++) {
+        // √(実部^2+虚部^2)^2 (差分の2乗)
+        sum += ((y_r[i] - x_r[i] / (double)DIVISOR) * (y_r[i] - x_r[i] / (double)DIVISOR) +
+                (y_i[i] - x_i[i] / (double)DIVISOR) * (y_i[i] - x_i[i] / (double)DIVISOR));
+    }
+
+    // dftとfftの結果の比較(差分の2乗平均の平方根)
+    cout << sqrt(sum / N) << endl;
 
     return 0;
 }
