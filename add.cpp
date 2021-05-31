@@ -14,9 +14,12 @@ using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
 
 double sin_table[N / 4 / M + 1];
 double table[2];
+double sini, cosi, tmp;
 
 double use_table_sin(int n) {
     n %= N;
+    tmp = 0;
+
     if (n == 0) {
         return 0;
     } else if (n == 1 || n == N / 2 - 1) {
@@ -29,26 +32,56 @@ double use_table_sin(int n) {
         return -table[1];
     } else if (n == N / 4) {
         return 1;
+    } else if (n == 3 * N / 4) {
+        return -1;
     } else if (n <= N / 4) {
-        if (n % 2 == 0) {
+        if (n % M == 0) {
             return sin_table[n / M];
         }
-        return sin_table[(n - 1) / M] * table[1] + sin_table[(N / 2 - (n + N / 4) + 1) / M] * table[0];
+        sini = sin_table[(n - n % M) / M];
+        cosi = sin_table[(N / 2 - (n + N / 4) + n % M) / M];
+        for (int i = 0; i < n % M; i++) {
+            tmp = sini * table[1] + cosi * table[0];
+            cosi = cosi * table[1] - sini * table[0];
+            sini = tmp;
+        }
+        return sini;
     } else if (n <= N / 2) {
-        if (n % 2 == 0) {
+        if (n % M == 0) {
             return sin_table[(N / 2 - n) / M];
         }
-        return sin_table[(N / 2 - n) / M] * table[1] + sin_table[((n + N / 4) - N / 2 + 1) / M] * table[0];
+        sini = sin_table[(N / 2 - n) / M];
+        cosi = sin_table[((n + N / 4) - N / 2 + n % M) / M];
+        for (int i = 0; i < n % M; i++) {
+            tmp = sini * table[1] + cosi * table[0];
+            cosi = cosi * table[1] - sini * table[0];
+            sini = tmp;
+        }
+        return sini;
     } else if (n <= 3 * N / 4) {
-        if (n % 2 == 0) {
+        if (n % M == 0) {
             return -sin_table[(n - N / 2) / M];
         }
-        return -(sin_table[(n - N / 2) / M] * table[1] + sin_table[(N - (n + N / 4) + 1) / M] * table[0]);
+        sini = sin_table[(n - N / 2) / M];
+        cosi = sin_table[(N - (n + N / 4) + n % M) / M];
+        for (int i = 0; i < n % M; i++) {
+            tmp = -(sini * table[1] + cosi * table[0]);
+            cosi = cosi * table[1] - sini * table[0];
+            sini = tmp;
+        }
+        return sini;
     } else if (n <= N) {
-        if (n % 2 == 0) {
+        if (n % M == 0) {
             return -sin_table[(N - n) / M];
         }
-        return -(sin_table[(N - n) / M] * table[1] + sin_table[(((n + N / 4) + 1 - N) / M)] * table[0]);
+        sini = sin_table[(N - n) / M];
+        cosi = sin_table[(((n + N / 4) + n % M - N) / M)];
+        for (int i = 0; i < n % M; i++) {
+            tmp = -(sini * table[1] + cosi * table[0]);
+            cosi = cosi * table[1] - sini * table[0];
+            sini = tmp;
+        }
+        return sini;
     } else {
         printf("Error!");
         return -1;
@@ -119,7 +152,6 @@ int main() {
     ofstream fft_ofs("add.csv");
     for (int i = 0; i < N; i++) {
         fft_ofs << x_r[i] << "," << x_i[i] << endl;
-        cout << i << ": " << use_table_sin(i) << endl;
     }
     fft_ofs.close();
 
