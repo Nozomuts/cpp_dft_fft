@@ -3,7 +3,7 @@
 #include <iostream> // for cout
 
 #define N 64 // 分割数
-#define M 2
+#define M 8
 #define Fs (double)8000 // サンプリング周波数
 #define A (double)1     // 振幅
 #define F0 (double)440  // 周波数
@@ -50,8 +50,8 @@ double use_table_sin(int n) {
         if (n % M == 0) {
             return sin_table[(N / 2 - n) / M];
         }
-        sini = sin_table[(N / 2 - n) / M];
-        cosi = sin_table[((n + N / 4) - N / 2 + n % M) / M];
+        sini = sin_table[(N / 2 - n + n % M) / M];
+        cosi = -sin_table[((n + N / 4) - N / 2 - n % M) / M];
         for (int i = 0; i < n % M; i++) {
             tmp = sini * table[1] + cosi * table[0];
             cosi = cosi * table[1] - sini * table[0];
@@ -62,10 +62,10 @@ double use_table_sin(int n) {
         if (n % M == 0) {
             return -sin_table[(n - N / 2) / M];
         }
-        sini = sin_table[(n - N / 2) / M];
-        cosi = sin_table[(N - (n + N / 4) + n % M) / M];
+        sini = -sin_table[(n - N / 2 - n % M) / M];
+        cosi = -sin_table[(N - (n + N / 4) + n % M) / M];
         for (int i = 0; i < n % M; i++) {
-            tmp = -(sini * table[1] + cosi * table[0]);
+            tmp = sini * table[1] + cosi * table[0];
             cosi = cosi * table[1] - sini * table[0];
             sini = tmp;
         }
@@ -74,10 +74,10 @@ double use_table_sin(int n) {
         if (n % M == 0) {
             return -sin_table[(N - n) / M];
         }
-        sini = sin_table[(N - n) / M];
-        cosi = sin_table[(((n + N / 4) + n % M - N) / M)];
+        sini = -sin_table[(N - n + n % M) / M];
+        cosi = sin_table[(((n + N / 4 - n % M) - N) / M)];
         for (int i = 0; i < n % M; i++) {
-            tmp = -(sini * table[1] + cosi * table[0]);
+            tmp = sini * table[1] + cosi * table[0];
             cosi = cosi * table[1] - sini * table[0];
             sini = tmp;
         }
@@ -129,8 +129,8 @@ void fft(double *x_r, double *x_i) {
 
 void create_table() {
     table[0] = sin(2 * M_PI / N);
-    table[1] = sin(2 * M_PI / N * (N / 4 - 1));
-    for (int i = 0; i < N / 4 / M; i++) {
+    table[1] = cos(2 * M_PI / N);
+    for (int i = 0; i <= N / 4 / M; i++) {
         sin_table[i] = sin(2 * M_PI / N * i * M);
     }
 }
@@ -152,6 +152,7 @@ int main() {
     ofstream fft_ofs("add.csv");
     for (int i = 0; i < N; i++) {
         fft_ofs << x_r[i] << "," << x_i[i] << endl;
+        cout << use_table_sin(i) << endl;
     }
     fft_ofs.close();
 
