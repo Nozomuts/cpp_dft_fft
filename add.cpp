@@ -3,7 +3,7 @@
 #include <iostream> // for cout
 
 #define N 64 // 分割数
-#define M 8
+#define M 2
 #define Fs (double)8000 // サンプリング周波数
 #define A (double)1     // 振幅
 #define F0 (double)440  // 周波数
@@ -159,12 +159,12 @@ int main() {
     system_clock::time_point start, end;
 
     start = system_clock::now();   // 計測スタート時刻を保存
-    for (int i = 0; i < 30; i++) { // N回繰り返して平均を求める
+    for (int i = 0; i < 100; i++) { // N回繰り返して平均を求める
         fft(x_r, x_i);
     }
     end = system_clock::now(); // 計測終了時刻を保存
     // 要した時間を計算
-    double fft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0) / 30;
+    double fft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0) / 100;
 
     cout << fft_time << "ms" << endl;
 

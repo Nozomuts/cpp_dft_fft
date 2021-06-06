@@ -1,7 +1,9 @@
 #include <chrono>
+#include <fstream>
 #include <iostream> // for cout
 
-#define N 8192           // 分割数
+#define N 2048 // 分割数
+#define M 1
 #define Fs (double)8000 // サンプリング周波数
 #define A (double)1     // 振幅
 #define F0 (double)440  // 周波数
@@ -10,73 +12,76 @@
 using namespace std;    // cout, endl, swap, ios, complex
 using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
 
-double sin_table[N / 4 + 1];
-double add_sin_table[4];
+double sin_table[N / 4 / M + 1];
+double table[2];
 double sini, cosi, tmp;
-
-double use_table_add_sin(int n) {
-    n %= N;
-    sini = 0;
-    cosi = 1;
-    tmp = 0;
-
-    if (n == 0) {
-        return add_sin_table[0];
-    } else if (n == 1) {
-        return add_sin_table[1];
-    } else if (n == N / 4 - 1) {
-        return add_sin_table[2];
-    } else if (n == N / 4) {
-        return add_sin_table[3];
-    } else if (n <= N / 4) {
-        for (int i = 0; i < n; i++) {
-            tmp = sini * add_sin_table[2] + cosi * add_sin_table[1];
-            cosi = cosi * add_sin_table[2] - sini * add_sin_table[1];
-            sini = tmp;
-        }
-        return sini;
-    } else if (n <= N / 2) {
-        for (int i = 0; i < N / 2 - n; i++) {
-            tmp = sini * add_sin_table[2] + cosi * add_sin_table[1];
-            cosi = cosi * add_sin_table[2] - sini * add_sin_table[1];
-            sini = tmp;
-        }
-        return sini;
-    } else if (n <= 3 * N / 4) {
-        for (int i = 0; i < n - N / 2; i++) {
-            tmp = sini * add_sin_table[2] + cosi * add_sin_table[1];
-            cosi = cosi * add_sin_table[2] - sini * add_sin_table[1];
-            sini = tmp;
-        }
-        return -sini;
-    } else if (n <= N) {
-        for (int i = 0; i < N - n; i++) {
-            tmp = sini * add_sin_table[2] + cosi * add_sin_table[1];
-            cosi = cosi * add_sin_table[2] - sini * add_sin_table[1];
-            sini = tmp;
-        }
-        return -sini;
-    } else {
-        printf("Error!");
-        return -1;
-    }
-}
-
-double use_table_add_cos(int n) {
-    n += N / 4;
-    return use_table_add_sin(n);
-}
 
 double use_table_sin(int n) {
     n %= N;
-    if (n <= N / 4) {
-        return sin_table[n];
+    tmp = 0;
+
+    if (n == 0) {
+        return 0;
+    } else if (n == 1 || n == N / 2 - 1) {
+        return table[0];
+    } else if (n == N / 4 - 1 || n == N / 2 - 1) {
+        return table[1];
+    } else if (n == N / 2 + 1 || n == N - 1) {
+        return -table[0];
+    } else if (n == 3 * N / 4 - 1) {
+        return -table[1];
+    } else if (n == N / 4) {
+        return 1;
+    } else if (n == 3 * N / 4) {
+        return -1;
+    } else if (n <= N / 4) {
+        if (n % M == 0) {
+            return sin_table[n / M];
+        }
+        sini = sin_table[(n - n % M) / M];
+        cosi = sin_table[(N / 2 - (n + N / 4) + n % M) / M];
+        for (int i = 0; i < n % M; i++) {
+            tmp = sini * table[1] + cosi * table[0];
+            cosi = cosi * table[1] - sini * table[0];
+            sini = tmp;
+        }
+        return sini;
     } else if (n <= N / 2) {
-        return sin_table[N / 2 - n];
+        if (n % M == 0) {
+            return sin_table[(N / 2 - n) / M];
+        }
+        sini = sin_table[(N / 2 - n + n % M) / M];
+        cosi = -sin_table[((n + N / 4) - N / 2 - n % M) / M];
+        for (int i = 0; i < n % M; i++) {
+            tmp = sini * table[1] + cosi * table[0];
+            cosi = cosi * table[1] - sini * table[0];
+            sini = tmp;
+        }
+        return sini;
     } else if (n <= 3 * N / 4) {
-        return -sin_table[n - N / 2];
+        if (n % M == 0) {
+            return -sin_table[(n - N / 2) / M];
+        }
+        sini = -sin_table[(n - N / 2 - n % M) / M];
+        cosi = -sin_table[(N - (n + N / 4) + n % M) / M];
+        for (int i = 0; i < n % M; i++) {
+            tmp = sini * table[1] + cosi * table[0];
+            cosi = cosi * table[1] - sini * table[0];
+            sini = tmp;
+        }
+        return sini;
     } else if (n <= N) {
-        return -sin_table[N - n];
+        if (n % M == 0) {
+            return -sin_table[(N - n) / M];
+        }
+        sini = -sin_table[(N - n + n % M) / M];
+        cosi = sin_table[(((n + N / 4 - n % M) - N) / M)];
+        for (int i = 0; i < n % M; i++) {
+            tmp = sini * table[1] + cosi * table[0];
+            cosi = cosi * table[1] - sini * table[0];
+            sini = tmp;
+        }
+        return sini;
     } else {
         printf("Error!");
         return -1;
@@ -100,7 +105,6 @@ void bit_reverse(double x_r[N], double x_i[N]) {
     }
 }
 
-// 高速フーリエ変換(加法定理なし)
 void fft(double x_r[N], double x_i[N]) {
     int m = N;
     while (m > 1) {
@@ -123,56 +127,16 @@ void fft(double x_r[N], double x_i[N]) {
     bit_reverse(x_r, x_i);
 }
 
-// 高速フーリエ変換(加法定理あり)
-void add_sin_fft(double x_r[N], double x_i[N]) {
-    int m = N;
-    while (m > 1) {
-        for (int i = 0; i < N / m; i++) {
-            for (int j = 0; j < m / 2; j++) {
-                double a_r = x_r[i * m + j];
-                double a_i = x_i[i * m + j];
-                double b_r = x_r[i * m + j + m / 2];
-                double b_i = x_i[i * m + j + m / 2];
-                x_r[i * m + j] = a_r + b_r;
-                x_i[i * m + j] = a_i + b_i;
-                x_r[i * m + j + m / 2] =
-                    (a_r - b_r) * use_table_add_cos(N / m * j) + (a_i - b_i) * use_table_add_sin(N / m * j);
-                x_i[i * m + j + m / 2] =
-                    (a_r - b_r) * (-use_table_add_sin(N / m * j)) + (a_i - b_i) * use_table_add_cos(N / m * j);
-            }
-        }
-        m /= 2;
-    }
-    bit_reverse(x_r, x_i);
-}
-
-void add(int i) {
-    sin_table[N / 4 - i] = use_table_cos(i - 1) * use_table_cos(1) - use_table_sin(1) * use_table_sin(i - 1);
-    sin_table[i + 1] = use_table_sin(i) * use_table_cos(1) + use_table_cos(i) * use_table_sin(1);
-}
-
 void create_table() {
-    sin_table[0] = 0;
-    sin_table[1] = sin(2 * M_PI / N);
-    sin_table[N / 4 - 1] = sin(2 * M_PI / N * (N / 4 - 1));
-    sin_table[N / 4] = 1;
-    add_sin_table[0] = 0;
-    add_sin_table[1] = sin(2 * M_PI / N);
-    add_sin_table[2] = sin(2 * M_PI / N * (N / 4 - 1));
-    add_sin_table[3] = 1;
-
-    for (int i = 1; i < N / 4; i++) {
-        add(i);
+    table[0] = sin(2 * M_PI / N);
+    table[1] = cos(2 * M_PI / N);
+    for (int i = 0; i <= N / 4 / M; i++) {
+        sin_table[i] = sin(2 * M_PI / N * i * M);
     }
 }
 
 int main() {
     double x_r[N], x_i[N];
-    double sum = 0;
-    system_clock::time_point start, end;
-
-    // テーブル作成
-    create_table();
 
     // 元データ作成
     for (int i = 0; i < N; i++) {
@@ -181,25 +145,19 @@ int main() {
         x_i[i] = 0;
     }
 
-    start = system_clock::now();  // 計測スタート時刻を保存
-    for (int i = 0; i < 30; i++) { // N回繰り返して平均を求める
+    create_table();
+
+    system_clock::time_point start, end;
+
+    start = system_clock::now();    // 計測スタート時刻を保存
+    for (int i = 0; i < 1000; i++) { // N回繰り返して平均を求める
         fft(x_r, x_i);
     }
     end = system_clock::now(); // 計測終了時刻を保存
     // 要した時間を計算
-    double fft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0) / 30;
+    double fft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0) / 1000;
 
-    start = system_clock::now();
-    for (int i = 0; i < 30; i++) {
-        add_sin_fft(x_r, x_i);
-    }
-    end = system_clock::now();
-
-    double add_sin_fft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0) / 30;
-
-    // 要した時間をミリ秒（1/1000秒）に変換して表示
-    cout << "FFT(加法定理なし): " << fft_time << " ms" << endl;
-    cout << "FFT(加法定理あり): " << add_sin_fft_time << " ms" << endl;
+    cout << fft_time << "ms" << endl;
 
     return 0;
 }
