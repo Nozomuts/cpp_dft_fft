@@ -2,12 +2,12 @@
 #include <fstream>
 #include <iostream> // for cout
 
-#define N 256    // 分割数
+#define N 1024   // 分割数
 #define Fs 8000 // サンプリング周波数
 #define A 1     // 振幅
 #define F0 440  // 周波数
 #define phi 0   // 初期位相
-#define DIVISOR 1000
+#define DIVISOR 10
 
 using namespace std;    // cout, endl, swap, ios, complex
 using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
@@ -38,7 +38,7 @@ double use_table_cos(int n) {
     return use_table_sin(n);
 }
 
-int use_table_sin_int(int i) {
+short use_table_sin_int(int i) {
     int n = i % N;
     if (n <= N / 4) {
         return sin_table_int[n];
@@ -54,7 +54,7 @@ int use_table_sin_int(int i) {
     }
 }
 
-int use_table_cos_int(int i) {
+short use_table_cos_int(int i) {
     i += N / 4;
     return use_table_sin_int(i);
 }
@@ -100,15 +100,15 @@ void fft(double *x_r, double *x_i) {
 }
 
 // 高速フーリエ変換
-void fft_int(int *x_r, int *x_i) {
+void fft_int(short *x_r, short *x_i) {
     int m = N;
     while (m > 1) {
         for (int i = 0; i < N / m; i++) {
             for (int j = 0; j < m / 2; j++) {
-                int a_r = x_r[i * m + j];
-                int a_i = x_i[i * m + j];
-                int b_r = x_r[i * m + j + m / 2];
-                int b_i = x_i[i * m + j + m / 2];
+                short a_r = x_r[i * m + j];
+                short a_i = x_i[i * m + j];
+                short b_r = x_r[i * m + j + m / 2];
+                short b_i = x_i[i * m + j + m / 2];
                 x_r[i * m + j] = a_r + b_r;
                 x_i[i * m + j] = a_i + b_i;
                 x_r[i * m + j + m / 2] = (a_r - b_r) * use_table_cos_int(N / m * j) / DIVISOR +
@@ -122,7 +122,7 @@ void fft_int(int *x_r, int *x_i) {
 }
 
 // ビット反転並べ替え
-void bit_reverse_int(int *x_r, int *x_i) {
+void bit_reverse_int(short *x_r, short *x_i) {
     for (int i = 0, j = 1; j < N; j++) {
         for (int k = N >> 1; k > (i ^= k); k >>= 1)
             ;
@@ -146,17 +146,20 @@ void bit_reverse(double *x_r, double *x_i) {
 }
 
 int main() {
-    int x_r[N], x_i[N];
+    short x_r[N], x_i[N];
     double y_r[N], y_i[N]; // x_r,x_iは元データ兼fftのデータ
     double sum = 0;
 
+    srand(10);
     // 元データ作成
     for (int i = 0; i < N; i++) {
         // x(t) = A * sin(2 * pi * F0 * t + phi) ( 0 <= t < 0.008 )
-        x_r[i] = A * sin(2 * M_PI * F0 * i / Fs + phi) * DIVISOR; // t = i / Fs
-        x_i[i] = 0;
-        y_r[i] = A * sin(2 * M_PI * F0 * i / Fs + phi); // t = i / Fs
-        y_i[i] = 0;
+        double rand1 = (double)rand() / RAND_MAX;
+        double rand2 = (double)rand() / RAND_MAX;
+        x_r[i] = rand1 * DIVISOR; // t = i / Fs
+        x_i[i] = rand2 * DIVISOR;
+        y_r[i] = rand1;
+        y_i[i] = rand2;
     }
 
     create_table_int();

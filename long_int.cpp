@@ -84,8 +84,8 @@ int main() {
     // 元データ作成
     for (short i = 0; i < N; i++) {
         // x(t) = A * sin(2 * pi * F0 * t + phi) ( 0 <= t < 0.008 )
-        x_r[i] = A * sin(2 * M_PI * F0 * i / Fs + phi) * M; // t = i / Fs
-        x_i[i] = 0;
+        x_r[i] = (double)rand() / RAND_MAX * M; // t = i / Fs
+        x_i[i] = (double)rand() / RAND_MAX * M;
     }
 
     create_table();
