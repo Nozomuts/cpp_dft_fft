@@ -39,17 +39,17 @@ int main() {
     bit_reverse_short(x_r, x_i);
 
     // 結果をファイルに出力
-    ofstream fft_ofs("int.csv");
-    ofstream fft2_ofs("int2.csv");
-    ofstream fft3_ofs("int3.csv");
+    ofstream double_short_ofs("double_short.csv");
+    ofstream double_ofs("double.csv");
+    ofstream short_ofs("short.csv");
     for (int i = 0; i < N; i++) {
-        fft_ofs << y_r[i] - x_r[i] / (double)DIVISOR << "," << y_i[i] - x_i[i] / (double)DIVISOR << endl;
-        fft2_ofs << y_r[i] << "," << y_i[i] << endl;
-        fft3_ofs << x_r[i] / (double)DIVISOR << "," << x_i[i] / (double)DIVISOR << endl;
+        double_short_ofs << y_r[i] - x_r[i] / (double)DIVISOR << "," << y_i[i] - x_i[i] / (double)DIVISOR << endl;
+        double_ofs << y_r[i] << "," << y_i[i] << endl;
+        short_ofs << x_r[i] / (double)DIVISOR << "," << x_i[i] / (double)DIVISOR << endl;
     }
-    fft_ofs.close();
-    fft2_ofs.close();
-    fft3_ofs.close();
+    double_short_ofs.close();
+    double_ofs.close();
+    short_ofs.close();
 
     for (int i = 0; i < N; i++) {
         // √(実部^2+虚部^2)^2 (差分の2乗)
