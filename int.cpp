@@ -2,12 +2,12 @@
 #include <fstream>
 #include <iostream> // for cout
 
-#define N 1024   // 分割数
+#define N 1024  // 分割数
 #define Fs 8000 // サンプリング周波数
 #define A 1     // 振幅
 #define F0 440  // 周波数
 #define phi 0   // 初期位相
-#define DIVISOR 10
+#define DIVISOR 1000
 
 using namespace std;    // cout, endl, swap, ios, complex
 using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
@@ -115,6 +115,7 @@ void fft_int(short *x_r, short *x_i) {
                                          (a_i - b_i) * use_table_sin_int(N / m * j) / DIVISOR;
                 x_i[i * m + j + m / 2] = (a_r - b_r) * (-use_table_sin_int(N / m * j)) / DIVISOR +
                                          (a_i - b_i) * use_table_cos_int(N / m * j) / DIVISOR;
+                cout << (a_r - b_r) * use_table_cos_int(N / m * j) << endl;
             }
         }
         m /= 2;
@@ -172,10 +173,16 @@ int main() {
 
     // 結果をファイルに出力
     ofstream fft_ofs("int.csv");
+    ofstream fft2_ofs("int2.csv");
+    ofstream fft3_ofs("int3.csv");
     for (int i = 0; i < N; i++) {
         fft_ofs << y_r[i] - x_r[i] / (double)DIVISOR << "," << y_i[i] - x_i[i] / (double)DIVISOR << endl;
+        fft2_ofs << y_r[i] << "," << y_i[i] << endl;
+        fft3_ofs << x_r[i] / (double)DIVISOR << "," << x_i[i] / (double)DIVISOR << endl;
     }
     fft_ofs.close();
+    fft2_ofs.close();
+    fft3_ofs.close();
 
     for (int i = 0; i < N; i++) {
         // √(実部^2+虚部^2)^2 (差分の2乗)
