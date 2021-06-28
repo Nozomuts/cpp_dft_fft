@@ -13,7 +13,7 @@ double sin_table[N / 4 + 1];
 double add_sin_table[4];
 double sini, cosi, tmp;
 
-double use_table_add_sin(int n) {
+double fft_add_sin(int n) {
     n %= N;
     sini = 0;
     cosi = 1;
@@ -61,9 +61,9 @@ double use_table_add_sin(int n) {
     }
 }
 
-double use_table_add_cos(int n) {
+double fft_add_cos(int n) {
     n += N / 4;
-    return use_table_add_sin(n);
+    return fft_add_sin(n);
 }
 
 // ビット反転並べ替え
@@ -90,10 +90,8 @@ void add_sin_fft(double x_r[N], double x_i[N]) {
                 double b_i = x_i[i * m + j + m / 2];
                 x_r[i * m + j] = a_r + b_r;
                 x_i[i * m + j] = a_i + b_i;
-                x_r[i * m + j + m / 2] =
-                    (a_r - b_r) * use_table_add_cos(N / m * j) + (a_i - b_i) * use_table_add_sin(N / m * j);
-                x_i[i * m + j + m / 2] =
-                    (a_r - b_r) * (-use_table_add_sin(N / m * j)) + (a_i - b_i) * use_table_add_cos(N / m * j);
+                x_r[i * m + j + m / 2] = (a_r - b_r) * fft_add_cos(N / m * j) + (a_i - b_i) * fft_add_sin(N / m * j);
+                x_i[i * m + j + m / 2] = (a_r - b_r) * (-fft_add_sin(N / m * j)) + (a_i - b_i) * fft_add_cos(N / m * j);
             }
         }
         m /= 2;
@@ -125,7 +123,7 @@ int main() {
     ofstream fft_ofs("fft_add.csv");
     for (int i = 0; i < N; i++) {
         fft_ofs << x_r[i] << "," << x_i[i] << endl;
-        cout << use_table_add_sin(i) << endl;
+        cout << fft_add_sin(i) << endl;
     }
     fft_ofs.close();
 

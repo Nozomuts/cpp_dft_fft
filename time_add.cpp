@@ -16,7 +16,7 @@ double sin_table[N / 4 / M + 1];
 double table[2];
 double sini, cosi, tmp;
 
-double use_table_sin(int n) {
+double add_sin(int n) {
     n %= N;
     tmp = 0;
 
@@ -88,9 +88,9 @@ double use_table_sin(int n) {
     }
 }
 
-double use_table_cos(int n) {
+double add_cos(int n) {
     n += N / 4;
-    return use_table_sin(n);
+    return add_sin(n);
 }
 
 // ビット反転並べ替え
@@ -116,10 +116,8 @@ void fft(double x_r[N], double x_i[N]) {
                 double b_i = x_i[i * m + j + m / 2];
                 x_r[i * m + j] = a_r + b_r;
                 x_i[i * m + j] = a_i + b_i;
-                x_r[i * m + j + m / 2] =
-                    (a_r - b_r) * use_table_cos(N / m * j) + (a_i - b_i) * use_table_sin(N / m * j);
-                x_i[i * m + j + m / 2] =
-                    (a_r - b_r) * (-use_table_sin(N / m * j)) + (a_i - b_i) * use_table_cos(N / m * j);
+                x_r[i * m + j + m / 2] = (a_r - b_r) * add_cos(N / m * j) + (a_i - b_i) * add_sin(N / m * j);
+                x_i[i * m + j + m / 2] = (a_r - b_r) * (-add_sin(N / m * j)) + (a_i - b_i) * add_cos(N / m * j);
             }
         }
         m /= 2;
@@ -149,7 +147,7 @@ int main() {
 
     system_clock::time_point start, end;
 
-    start = system_clock::now();    // 計測スタート時刻を保存
+    start = system_clock::now();     // 計測スタート時刻を保存
     for (int i = 0; i < 1000; i++) { // N回繰り返して平均を求める
         fft(x_r, x_i);
     }

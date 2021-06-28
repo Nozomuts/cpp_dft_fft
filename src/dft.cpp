@@ -16,7 +16,7 @@ double sin_table[] = {
     0.77301, 0.83147,   0.881921, 0.92388,  0.95694,  0.980785, 0.995185, 1,
 };
 
-double use_table_sin(int i) {
+double add_sin(int i) {
     int n = i % N;
     if (n <= N / 4) {
         return sin_table[n];
@@ -32,16 +32,16 @@ double use_table_sin(int i) {
     }
 }
 
-double use_table_cos(int i) {
+double add_cos(int i) {
     i += N / 4;
-    return use_table_sin(i);
+    return add_sin(i);
 }
 
 void dft(double x_r[N], double x_i[N], double *dft_r, double *dft_i) {
     for (int k = 0; k < N; k++) {
         for (int n = 0; n < N; n++) {
-            dft_r[k] += x_r[n] * use_table_cos(k * n) + x_i[n] * use_table_sin(k * n);
-            dft_i[k] += x_r[n] * (-use_table_sin(k * n)) + x_i[n] * use_table_cos(k * n);
+            dft_r[k] += x_r[n] * add_cos(k * n) + x_i[n] * add_sin(k * n);
+            dft_i[k] += x_r[n] * (-add_sin(k * n)) + x_i[n] * add_cos(k * n);
         }
     }
 }

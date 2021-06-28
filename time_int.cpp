@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream> // for cout
 
-#define N 64   // 分割数
+#define N 64    // 分割数
 #define Fs 8000 // サンプリング周波数
 #define A 1     // 振幅
 #define F0 440  // 周波数
@@ -14,7 +14,7 @@ using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
 
 int sin_table[N / 4 + 1];
 
-int use_table_sin(int i) {
+int add_sin(int i) {
     int n = i % N;
     if (n <= N / 4) {
         return sin_table[n];
@@ -30,9 +30,9 @@ int use_table_sin(int i) {
     }
 }
 
-int use_table_cos(int i) {
+int add_cos(int i) {
     i += N / 4;
-    return use_table_sin(i);
+    return add_sin(i);
 }
 
 // テーブル作成
@@ -68,10 +68,8 @@ void fft(int x_r[N], int x_i[N]) {
                 int b_i = x_i[i * m + j + m / 2];
                 x_r[i * m + j] = a_r + b_r;
                 x_i[i * m + j] = a_i + b_i;
-                x_r[i * m + j + m / 2] =
-                    (a_r - b_r) * use_table_cos(N / m * j) / M + (a_i - b_i) * use_table_sin(N / m * j) / M;
-                x_i[i * m + j + m / 2] =
-                    (a_r - b_r) * (-use_table_sin(N / m * j)) / M + (a_i - b_i) * use_table_cos(N / m * j) / M;
+                x_r[i * m + j + m / 2] = (a_r - b_r) * add_cos(N / m * j) / M + (a_i - b_i) * add_sin(N / m * j) / M;
+                x_i[i * m + j + m / 2] = (a_r - b_r) * (-add_sin(N / m * j)) / M + (a_i - b_i) * add_cos(N / m * j) / M;
             }
         }
         m /= 2;
@@ -95,7 +93,7 @@ int main() {
 
     create_table();
 
-    start = system_clock::now();    // 計測スタート時刻を保存
+    start = system_clock::now();     // 計測スタート時刻を保存
     for (int i = 0; i < 1000; i++) { // N回繰り返して平均を求める
         fft(x_r, x_i);
     }

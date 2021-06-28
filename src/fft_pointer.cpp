@@ -1,21 +1,80 @@
-#include <iostream>
 #include "CONST.h"
+#include <iostream>
 
 using namespace std;
 
 double sin_table[N / 4 + 1];
+double sin_table[N / 4 / M + 1];
+double table[2];
+double sini, cosi, tmp;
 
 // テーブルを用いたsin関数
-double use_table_sin(int n) {
+double add_sin(int n) {
     n %= N;
-    if (n <= N / 4) {
-        return sin_table[n];
+    tmp = 0;
+
+    if (n == 0) {
+        return 0;
+    } else if (n == 1 || n == N / 2 - 1) {
+        return table[0];
+    } else if (n == N / 4 - 1 || n == N / 2 - 1) {
+        return table[1];
+    } else if (n == N / 2 + 1 || n == N - 1) {
+        return -table[0];
+    } else if (n == 3 * N / 4 - 1) {
+        return -table[1];
+    } else if (n == N / 4) {
+        return 1;
+    } else if (n == 3 * N / 4) {
+        return -1;
+    } else if (n <= N / 4) {
+        if (n % M == 0) {
+            return sin_table[n / M];
+        }
+        sini = sin_table[(n - n % M) / M];
+        cosi = sin_table[(N / 2 - (n + N / 4) + n % M) / M];
+        for (int i = 0; i < n % M; i++) {
+            tmp = sini * table[1] + cosi * table[0];
+            cosi = cosi * table[1] - sini * table[0];
+            sini = tmp;
+        }
+        return sini;
     } else if (n <= N / 2) {
-        return sin_table[N / 2 - n];
+        if (n % M == 0) {
+            return sin_table[(N / 2 - n) / M];
+        }
+        sini = sin_table[(N / 2 - n + n % M) / M];
+        cosi = -sin_table[((n + N / 4) - N / 2 - n % M) / M];
+        for (int i = 0; i < n % M; i++) {
+            tmp = sini * table[1] + cosi * table[0];
+            cosi = cosi * table[1] - sini * table[0];
+            sini = tmp;
+        }
+        return sini;
     } else if (n <= 3 * N / 4) {
-        return -sin_table[n - N / 2];
+        if (n % M == 0) {
+            return -sin_table[(n - N / 2) / M];
+        }
+        sini = -sin_table[(n - N / 2 - n % M) / M];
+        cosi = -sin_table[(N - (n + N / 4) + n % M) / M];
+        for (int i = 0; i < n % M; i++) {
+            tmp = sini * table[1] + cosi * table[0];
+            cosi = cosi * table[1] - sini * table[0];
+            sini = tmp;
+        }
+        return sini;
     } else if (n <= N) {
-        return -sin_table[N - n];
+        if (n % M == 0) {
+            return -sin_table[(N - n) / M];
+        }
+        sini = -sin_table[(N - n + n % M) / M];
+        cosi = sin_table[(((n + N / 4 - n % M) - N) / M)];
+        for (int i = 0; i < n % M; i++) {
+            tmp = sini * table[1] + cosi * table[0];
+            cosi = cosi * table[1] - sini * table[0];
+            sini = tmp;
+        }
+        return sini;
     } else {
         printf("Error!");
         return -1;
@@ -23,9 +82,9 @@ double use_table_sin(int n) {
 }
 
 // テーブルを用いたcos関数
-double use_table_cos(int n) {
+double add_cos(int n) {
     n += N / 4;
-    return use_table_sin(n);
+    return add_sin(n);
 }
 
 // テーブル作成

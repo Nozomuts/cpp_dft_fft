@@ -1,7 +1,7 @@
 #include <chrono>
 #include <iostream> // for cout
 
-#define N 1024            // 分割数
+#define N 1024          // 分割数
 #define Fs (double)8000 // サンプリング周波数
 #define A (double)1     // 振幅
 #define F0 (double)440  // 周波数
@@ -12,7 +12,7 @@ using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
 
 double sin_table[N / 4 + 1];
 
-double use_table_sin(int n) {
+double add_sin(int n) {
     n %= N;
     if (n <= N / 4) {
         return sin_table[n];
@@ -28,9 +28,9 @@ double use_table_sin(int n) {
     }
 }
 
-double use_table_cos(int n) {
+double add_cos(int n) {
     n += N / 4;
-    return use_table_sin(n);
+    return add_sin(n);
 }
 
 // ビット反転並べ替え
@@ -67,7 +67,7 @@ void fft(double x_r[N], double x_i[N]) {
 }
 
 // 高速フーリエ変換(テーブル有り)
-void use_table_fft(double x_r[N], double x_i[N]) {
+void fft_fft(double x_r[N], double x_i[N]) {
     int m = N;
     while (m > 1) {
         for (int i = 0; i < N / m; i++) {
@@ -78,10 +78,8 @@ void use_table_fft(double x_r[N], double x_i[N]) {
                 double b_i = x_i[i * m + j + m / 2];
                 x_r[i * m + j] = a_r + b_r;
                 x_i[i * m + j] = a_i + b_i;
-                x_r[i * m + j + m / 2] =
-                    (a_r - b_r) * use_table_cos(N / m * j) + (a_i - b_i) * use_table_sin(N / m * j);
-                x_i[i * m + j + m / 2] =
-                    (a_r - b_r) * (-use_table_sin(N / m * j)) + (a_i - b_i) * use_table_cos(N / m * j);
+                x_r[i * m + j + m / 2] = (a_r - b_r) * add_cos(N / m * j) + (a_i - b_i) * add_sin(N / m * j);
+                x_i[i * m + j + m / 2] = (a_r - b_r) * (-add_sin(N / m * j)) + (a_i - b_i) * add_cos(N / m * j);
             }
         }
         m /= 2;
@@ -90,8 +88,8 @@ void use_table_fft(double x_r[N], double x_i[N]) {
 }
 
 void add_sin(int i) {
-    sin_table[N / 4 - i] = use_table_cos(i - 1) * use_table_cos(1) - use_table_sin(1) * use_table_sin(i - 1);
-    sin_table[i + 1] = use_table_sin(i) * use_table_cos(1) + use_table_cos(i) * use_table_sin(1);
+    sin_table[N / 4 - i] = add_cos(i - 1) * add_cos(1) - add_sin(1) * add_sin(i - 1);
+    sin_table[i + 1] = add_sin(i) * add_cos(1) + add_cos(i) * add_sin(1);
 }
 
 void create_table() {
@@ -130,15 +128,15 @@ int main() {
 
     start = system_clock::now();
     for (int i = 0; i < N; i++) {
-        use_table_fft(x_r, x_i);
+        fft_fft(x_r, x_i);
     }
     end = system_clock::now();
 
-    double use_table_fft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0) / N;
+    double fft_fft_time = static_cast<double>(duration_cast<microseconds>(end - start).count() / 1000.0) / N;
 
     // 要した時間をミリ秒（1/1000秒）に変換して表示
     cout << "FFT(テーブル無し): " << fft_time << " ms" << endl;
-    cout << "FFT(テーブル有り): " << use_table_fft_time << " ms" << endl;
+    cout << "FFT(テーブル有り): " << fft_fft_time << " ms" << endl;
 
     return 0;
 }

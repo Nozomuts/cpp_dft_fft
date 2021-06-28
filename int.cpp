@@ -16,7 +16,7 @@ int sin_table_int[N / 4 + 1];
 double sin_table[N / 4 + 1];
 
 // テーブルを用いたsin関数
-double use_table_sin(int n) {
+double add_sin(int n) {
     n %= N;
     if (n <= N / 4) {
         return sin_table[n];
@@ -33,12 +33,12 @@ double use_table_sin(int n) {
 }
 
 // テーブルを用いたcos関数
-double use_table_cos(int n) {
+double add_cos(int n) {
     n += N / 4;
-    return use_table_sin(n);
+    return add_sin(n);
 }
 
-short use_table_sin_int(int i) {
+short add_sin_int(int i) {
     int n = i % N;
     if (n <= N / 4) {
         return sin_table_int[n];
@@ -54,9 +54,9 @@ short use_table_sin_int(int i) {
     }
 }
 
-short use_table_cos_int(int i) {
+short add_cos_int(int i) {
     i += N / 4;
-    return use_table_sin_int(i);
+    return add_sin_int(i);
 }
 
 // テーブル作成
@@ -89,10 +89,8 @@ void fft(double *x_r, double *x_i) {
                 double b_i = x_i[i * m + j + m / 2];
                 x_r[i * m + j] = a_r + b_r;
                 x_i[i * m + j] = a_i + b_i;
-                x_r[i * m + j + m / 2] =
-                    (a_r - b_r) * use_table_cos(N / m * j) + (a_i - b_i) * use_table_sin(N / m * j);
-                x_i[i * m + j + m / 2] =
-                    (a_r - b_r) * (-use_table_sin(N / m * j)) + (a_i - b_i) * use_table_cos(N / m * j);
+                x_r[i * m + j + m / 2] = (a_r - b_r) * add_cos(N / m * j) + (a_i - b_i) * add_sin(N / m * j);
+                x_i[i * m + j + m / 2] = (a_r - b_r) * (-add_sin(N / m * j)) + (a_i - b_i) * add_cos(N / m * j);
             }
         }
         m /= 2;
@@ -111,11 +109,11 @@ void fft_int(short *x_r, short *x_i) {
                 short b_i = x_i[i * m + j + m / 2];
                 x_r[i * m + j] = a_r + b_r;
                 x_i[i * m + j] = a_i + b_i;
-                x_r[i * m + j + m / 2] = (a_r - b_r) * use_table_cos_int(N / m * j) / DIVISOR +
-                                         (a_i - b_i) * use_table_sin_int(N / m * j) / DIVISOR;
-                x_i[i * m + j + m / 2] = (a_r - b_r) * (-use_table_sin_int(N / m * j)) / DIVISOR +
-                                         (a_i - b_i) * use_table_cos_int(N / m * j) / DIVISOR;
-                cout << (a_r - b_r) * use_table_cos_int(N / m * j) << endl;
+                x_r[i * m + j + m / 2] =
+                    (a_r - b_r) * add_cos_int(N / m * j) / DIVISOR + (a_i - b_i) * add_sin_int(N / m * j) / DIVISOR;
+                x_i[i * m + j + m / 2] =
+                    (a_r - b_r) * (-add_sin_int(N / m * j)) / DIVISOR + (a_i - b_i) * add_cos_int(N / m * j) / DIVISOR;
+                cout << (a_r - b_r) * add_cos_int(N / m * j) << endl;
             }
         }
         m /= 2;

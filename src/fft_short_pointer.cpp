@@ -29,18 +29,18 @@ void fft_short(short *x_r, short *x_i) {
                 short b_i = x_i[i * m + j + m / 2];
                 x_r[i * m + j] = a_r + b_r;
                 x_i[i * m + j] = a_i + b_i;
-                x_r[i * m + j + m / 2] = (a_r - b_r) * use_table_cos_short(N / m * j) / DIVISOR +
-                                         (a_i - b_i) * use_table_sin_short(N / m * j) / DIVISOR;
-                x_i[i * m + j + m / 2] = (a_r - b_r) * (-use_table_sin_short(N / m * j)) / DIVISOR +
-                                         (a_i - b_i) * use_table_cos_short(N / m * j) / DIVISOR;
-                cout << (a_r - b_r) * use_table_cos_short(N / m * j) << endl;
+                x_r[i * m + j + m / 2] =
+                    (a_r - b_r) * add_cos_short(N / m * j) / DIVISOR + (a_i - b_i) * add_sin_short(N / m * j) / DIVISOR;
+                x_i[i * m + j + m / 2] = (a_r - b_r) * (-add_sin_short(N / m * j)) / DIVISOR +
+                                         (a_i - b_i) * add_cos_short(N / m * j) / DIVISOR;
+                cout << (a_r - b_r) * add_cos_short(N / m * j) << endl;
             }
         }
         m /= 2;
     }
 }
 
-short use_table_sin_short(int i) {
+short add_sin_short(int i) {
     int n = i % N;
     if (n <= N / 4) {
         return sin_table_int[n];
@@ -56,9 +56,9 @@ short use_table_sin_short(int i) {
     }
 }
 
-short use_table_cos_short(int i) {
+short add_cos_short(int i) {
     i += N / 4;
-    return use_table_sin_short(i);
+    return add_sin_short(i);
 }
 
 // テーブル作成
