@@ -5,6 +5,27 @@ using namespace std;
 
 int sin_table_int[N / 4 + 1];
 
+short add_sin_short(int i) {
+    int n = i % N;
+    if (n <= N / 4) {
+        return sin_table_int[n];
+    } else if (n <= N / 2) {
+        return sin_table_int[N / 2 - n];
+    } else if (n <= 3 * N / 4) {
+        return -sin_table_int[n - N / 2];
+    } else if (n <= N) {
+        return -sin_table_int[N - n];
+    } else {
+        printf("Error!");
+        return -1;
+    }
+}
+
+short add_cos_short(int i) {
+    i += N / 4;
+    return add_sin_short(i);
+}
+
 // ビット反転並べ替え
 void bit_reverse_short(short x_r[N], short x_i[N]) {
     for (int i = 0, j = 1; j < N; j++) {
@@ -75,27 +96,6 @@ void fft_short_pointer(short *x_r, short *x_i) {
         m /= 2;
     }
     bit_reverse_short_pointer(x_r, x_i);
-}
-
-short add_sin_short(int i) {
-    int n = i % N;
-    if (n <= N / 4) {
-        return sin_table_int[n];
-    } else if (n <= N / 2) {
-        return sin_table_int[N / 2 - n];
-    } else if (n <= 3 * N / 4) {
-        return -sin_table_int[n - N / 2];
-    } else if (n <= N) {
-        return -sin_table_int[N - n];
-    } else {
-        printf("Error!");
-        return -1;
-    }
-}
-
-short add_cos_short(int i) {
-    i += N / 4;
-    return add_sin_short(i);
 }
 
 // テーブル作成

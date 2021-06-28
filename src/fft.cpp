@@ -3,7 +3,6 @@
 
 using namespace std;
 
-double sin_table[N / 4 + 1];
 double sin_table[N / 4 / M + 1];
 double table[2];
 double sini, cosi, tmp;
