@@ -33,9 +33,8 @@ int main() {
     create_table_short();
     create_table();
 
-    fft(y_r, y_i);
+    fft_pointer(y_r, y_i);
     fft_short(x_r, x_i);
-    bit_reverse(y_r, y_i);
     bit_reverse_short(x_r, x_i);
 
     // 結果をファイルに出力

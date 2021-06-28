@@ -97,7 +97,7 @@ void create_table() {
 }
 
 // ビット反転並べ替え
-void bit_reverse(double *x_r, double *x_i) {
+void bit_reverse_pointer(double *x_r, double *x_i) {
     for (int i = 0, j = 1; j < N; j++) {
         for (int k = N >> 1; k > (i ^= k); k >>= 1)
             ;
@@ -106,4 +106,56 @@ void bit_reverse(double *x_r, double *x_i) {
             swap(x_i[i], x_i[j]);
         }
     }
+}
+
+// ビット反転並べ替え
+void bit_reverse(double x_r[N], double x_i[N]) {
+    for (int i = 0, j = 1; j < N - 1; j++) {
+        for (int k = N >> 1; k > (i ^= k); k >>= 1)
+            ;
+        if (i < j) {
+            swap(x_r[i], x_r[j]); // 入れ替え
+            swap(x_i[i], x_i[j]);
+        }
+    }
+}
+
+void fft(double x_r[N], double x_i[N]) {
+    int m = N;
+    while (m > 1) {
+        for (int i = 0; i < N / m; i++) {
+            for (int j = 0; j < m / 2; j++) {
+                double a_r = x_r[i * m + j];
+                double a_i = x_i[i * m + j];
+                double b_r = x_r[i * m + j + m / 2];
+                double b_i = x_i[i * m + j + m / 2];
+                x_r[i * m + j] = a_r + b_r;
+                x_i[i * m + j] = a_i + b_i;
+                x_r[i * m + j + m / 2] = (a_r - b_r) * add_cos(N / m * j) + (a_i - b_i) * add_sin(N / m * j);
+                x_i[i * m + j + m / 2] = (a_r - b_r) * (-add_sin(N / m * j)) + (a_i - b_i) * add_cos(N / m * j);
+            }
+        }
+        m /= 2;
+    }
+    bit_reverse(x_r, x_i);
+}
+
+void fft_pointer(double *x_r, double *x_i) {
+    int m = N;
+    while (m > 1) {
+        for (int i = 0; i < N / m; i++) {
+            for (int j = 0; j < m / 2; j++) {
+                double a_r = x_r[i * m + j];
+                double a_i = x_i[i * m + j];
+                double b_r = x_r[i * m + j + m / 2];
+                double b_i = x_i[i * m + j + m / 2];
+                x_r[i * m + j] = a_r + b_r;
+                x_i[i * m + j] = a_i + b_i;
+                x_r[i * m + j + m / 2] = (a_r - b_r) * add_cos(N / m * j) + (a_i - b_i) * add_sin(N / m * j);
+                x_i[i * m + j + m / 2] = (a_r - b_r) * (-add_sin(N / m * j)) + (a_i - b_i) * add_cos(N / m * j);
+            }
+        }
+        m /= 2;
+    }
+    bit_reverse_pointer(x_r, x_i);
 }
