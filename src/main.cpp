@@ -1,14 +1,8 @@
 #include <chrono>
 #include <fstream>
 #include <iostream> // for cout
-#include "main.h"
-
-#define N 1024  // 分割数
-#define Fs 8000 // サンプリング周波数
-#define A 1     // 振幅
-#define F0 440  // 周波数
-#define phi 0   // 初期位相
-#define DIVISOR 1000
+#include "main.hpp"
+#include "CONST.hpp"
 
 using namespace std;    // cout, endl, swap, ios, complex
 using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
@@ -34,8 +28,7 @@ int main() {
     create_table();
 
     fft_pointer(y_r, y_i);
-    fft_short(x_r, x_i);
-    bit_reverse_short(x_r, x_i);
+    fft_short_pointer(x_r, x_i);
 
     // 結果をファイルに出力
     ofstream double_short_ofs("double_short.csv");

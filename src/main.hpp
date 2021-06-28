@@ -1,7 +1,9 @@
-#include "CONST.h"
+#include "CONST.hpp"
 
 void bit_reverse_short(short *x_r, short *x_i);
 void fft_short(short *x_r, short *x_i);
+void bit_reverse_short_pointer(short *x_r, short *x_i);
+void fft_short_pointer(short *x_r, short *x_i);
 void create_table_short();
 short add_sin_short(int i);
 short add_cos_short(int i);
