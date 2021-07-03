@@ -1,5 +1,6 @@
 #include "CONST.hpp"
 #include <iostream>
+#include <math.h>
 
 using namespace std;
 

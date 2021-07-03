@@ -1,6 +1,7 @@
 #include <chrono>
 #include <fstream>
 #include <iostream> // for cout
+#include <math.h>
 #include "main.hpp"
 #include "CONST.hpp"
 
