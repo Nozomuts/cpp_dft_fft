@@ -13,7 +13,7 @@ short add_sin_short(int n) {
     tmp_short = 0;
 
     if (n == 0) {
-        return 0;
+        return 0 * DIVISOR;
     } else if (n == 1 || n == N / 2 - 1) {
         return table_short[0];
     } else if (n == N / 4 - 1 || n == N / 2 - 1) {
@@ -23,9 +23,9 @@ short add_sin_short(int n) {
     } else if (n == 3 * N / 4 - 1) {
         return -table_short[1];
     } else if (n == N / 4) {
-        return 1;
+        return 1 * DIVISOR;
     } else if (n == 3 * N / 4) {
-        return -1;
+        return -1 * DIVISOR;
     } else if (n <= N / 4) {
         if (n % M == 0) {
             return sin_table_short[n / M];
