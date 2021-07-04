@@ -81,8 +81,8 @@ short add_sin_short(int n) {
 }
 
 short add_cos_short(int n) {
-    i += N / 4;
-    return add_sin_short(i);
+    n += N / 4;
+    return add_sin_short(n);
 }
 
 // ビット反転並べ替え
