@@ -4,7 +4,7 @@
 
 using namespace std;
 
-short sin_table_short[N / 4 + 1];
+short sin_table_short[N / 4 / M + 1];
 short table_short[2];
 short sini_short, cosi_short, tmp_short;
 
@@ -80,7 +80,7 @@ short add_sin_short(int n) {
     }
 }
 
-short add_cos_short(int i) {
+short add_cos_short(int n) {
     i += N / 4;
     return add_sin_short(i);
 }

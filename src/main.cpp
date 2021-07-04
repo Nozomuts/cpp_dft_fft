@@ -19,8 +19,8 @@ int main() {
         // x(t) = A * sin(2 * pi * F0 * t + phi) ( 0 <= t < 0.008 )
         double rand1 = (double)rand() / RAND_MAX;
         double rand2 = (double)rand() / RAND_MAX;
-        x_r[i] = sin(2 * M_PI * 440 * i / 8000) * DIVISOR; // i/8000 = i / Fs
-        x_i[i] = 0 * DIVISOR;
+        x_r[i] = sin(2 * M_PI * 440 * i / 8000) * DIVISOR; // t = i / Fs
+        x_i[i] = 0;
         y_r[i] = sin(2 * M_PI * 440 * i / 8000);
         y_i[i] = 0;
     }
@@ -39,7 +39,6 @@ int main() {
         double_short_ofs << y_r[i] - x_r[i] / (double)DIVISOR << "," << y_i[i] - x_i[i] / (double)DIVISOR << endl;
         double_ofs << y_r[i] << "," << y_i[i] << endl;
         short_ofs << x_r[i] / (double)DIVISOR << "," << x_i[i] / (double)DIVISOR << endl;
-        cout << add_sin_short(i) << "," << add_sin(i) << endl;
     }
     double_short_ofs.close();
     double_ofs.close();
