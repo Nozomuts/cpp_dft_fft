@@ -33,8 +33,8 @@ short add_sin_short(int n) {
         sini_short = sin_table_short[(n - n % M) / M];
         cosi_short = sin_table_short[(N / 2 - (n + N / 4) + n % M) / M];
         for (int i = 0; i < n % M; i++) {
-            tmp_short = sini_short * table_short[1] + cosi_short * table_short[0];
-            cosi_short = cosi_short * table_short[1] - sini_short * table_short[0];
+            tmp_short = sini_short * table_short[1] / DIVISOR + cosi_short * table_short[0] / DIVISOR;
+            cosi_short = cosi_short * table_short[1] / DIVISOR - sini_short * table_short[0] / DIVISOR;
             sini_short = tmp_short;
         }
         return sini_short;
@@ -45,8 +45,8 @@ short add_sin_short(int n) {
         sini_short = sin_table_short[(N / 2 - n + n % M) / M];
         cosi_short = -sin_table_short[((n + N / 4) - N / 2 - n % M) / M];
         for (int i = 0; i < n % M; i++) {
-            tmp_short = sini_short * table_short[1] + cosi_short * table_short[0];
-            cosi_short = cosi_short * table_short[1] - sini_short * table_short[0];
+            tmp_short = sini_short * table_short[1] / DIVISOR + cosi_short * table_short[0] / DIVISOR;
+            cosi_short = cosi_short * table_short[1] / DIVISOR - sini_short * table_short[0] / DIVISOR;
             sini_short = tmp_short;
         }
         return sini_short;
@@ -57,8 +57,8 @@ short add_sin_short(int n) {
         sini_short = -sin_table_short[(n - N / 2 - n % M) / M];
         cosi_short = -sin_table_short[(N - (n + N / 4) + n % M) / M];
         for (int i = 0; i < n % M; i++) {
-            tmp_short = sini_short * table_short[1] + cosi_short * table_short[0];
-            cosi_short = cosi_short * table_short[1] - sini_short * table_short[0];
+            tmp_short = sini_short * table_short[1] / DIVISOR + cosi_short * table_short[0] / DIVISOR;
+            cosi_short = cosi_short * table_short[1] / DIVISOR - sini_short * table_short[0] / DIVISOR;
             sini_short = tmp_short;
         }
         return sini_short;
@@ -69,8 +69,8 @@ short add_sin_short(int n) {
         sini_short = -sin_table_short[(N - n + n % M) / M];
         cosi_short = sin_table_short[(((n + N / 4 - n % M) - N) / M)];
         for (int i = 0; i < n % M; i++) {
-            tmp_short = sini_short * table_short[1] + cosi_short * table_short[0];
-            cosi_short = cosi_short * table_short[1] - sini_short * table_short[0];
+            tmp_short = sini_short * table_short[1] / DIVISOR + cosi_short * table_short[0] / DIVISOR;
+            cosi_short = cosi_short * table_short[1] / DIVISOR - sini_short * table_short[0] / DIVISOR;
             sini_short = tmp_short;
         }
         return sini_short;
@@ -113,7 +113,6 @@ void fft_short(short x_r[N], short x_i[N]) {
                     (a_r - b_r) * add_cos_short(N / m * j) / DIVISOR + (a_i - b_i) * add_sin_short(N / m * j) / DIVISOR;
                 x_i[i * m + j + m / 2] = (a_r - b_r) * (-add_sin_short(N / m * j)) / DIVISOR +
                                          (a_i - b_i) * add_cos_short(N / m * j) / DIVISOR;
-                cout << (a_r - b_r) * add_cos_short(N / m * j) << endl;
             }
         }
         m /= 2;
@@ -149,7 +148,6 @@ void fft_short_pointer(short *x_r, short *x_i) {
                     (a_r - b_r) * add_cos_short(N / m * j) / DIVISOR + (a_i - b_i) * add_sin_short(N / m * j) / DIVISOR;
                 x_i[i * m + j + m / 2] = (a_r - b_r) * (-add_sin_short(N / m * j)) / DIVISOR +
                                          (a_i - b_i) * add_cos_short(N / m * j) / DIVISOR;
-                cout << (a_r - b_r) * add_cos_short(N / m * j) << endl;
             }
         }
         m /= 2;
@@ -159,7 +157,8 @@ void fft_short_pointer(short *x_r, short *x_i) {
 
 // テーブル作成
 void create_table_short() {
-    sin_table_short[0] = 0;
+    table_short[0] = sin(2 * M_PI / N) * DIVISOR;
+    table_short[1] = cos(2 * M_PI / N) * DIVISOR;
 
     for (int i = 1; i <= N / 4 / M; i++) {
         sin_table_short[i] = sin(2 * M_PI / N * M * i) * DIVISOR;

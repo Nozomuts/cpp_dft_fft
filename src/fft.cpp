@@ -89,10 +89,10 @@ double add_cos(int n) {
 
 // テーブル作成
 void create_table() {
-    sin_table[0] = 0;
-
-    for (int i = 1; i <= N / 4 / M; i++) {
-        sin_table[i] = sin(2 * M_PI / N * M * i);
+    table[0] = sin(2 * M_PI / N);
+    table[1] = cos(2 * M_PI / N);
+    for (int i = 0; i <= N / 4 / M; i++) {
+        sin_table[i] = sin(2 * M_PI / N * i * M);
     }
 }
 
