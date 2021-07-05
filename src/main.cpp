@@ -19,10 +19,10 @@ int main() {
         // x(t) = A * sin(2 * pi * F0 * t + phi) ( 0 <= t < 0.008 )
         double rand1 = (double)rand() / RAND_MAX;
         double rand2 = (double)rand() / RAND_MAX;
-        x_r[i] = sin(2 * M_PI * 440 * i / 8000) * DIVISOR; // t = i / Fs
-        x_i[i] = 0;
-        y_r[i] = sin(2 * M_PI * 440 * i / 8000);
-        y_i[i] = 0;
+        x_r[i] = rand1 * DIVISOR; // t = i / Fs
+        x_i[i] = rand2 * DIVISOR;
+        y_r[i] = rand1;
+        y_i[i] = rand2;
     }
 
     create_table_short();
@@ -46,7 +46,7 @@ int main() {
 
     for (int i = 0; i < N; i++) {
         // √(実部^2+虚部^2)^2 (差分の2乗)
-        sum += ((y_r[i] - x_r[i] / (double)DIVISOR) * (y_r[i] - x_r[i] / (double)DIVISOR) +
+        sum += ((y_r[i] - x_r[i] / (double)DIVISOR) * 1.2 * (y_r[i] - x_r[i] / (double)DIVISOR) +
                 (y_i[i] - x_i[i] / (double)DIVISOR) * (y_i[i] - x_i[i] / (double)DIVISOR));
     }
 

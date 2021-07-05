@@ -1,3 +1,3 @@
-#define N 64
-#define DIVISOR 1000
+#define N 1024
+#define DIVISOR 50
 #define M 1
