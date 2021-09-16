@@ -1,12 +1,8 @@
-#include "main.hpp"
-#include "CONST.hpp"
-#include <chrono>
-#include <fstream>
-#include <iostream> // for cout
+#include "main.h"
+#include "CONST.h"
 #include <math.h>
-
-using namespace std;    // cout, endl, swap, ios, complex
-using namespace chrono; // system_clock, duration_cast, microseconds, ofstream
+#include <stdlib.h>
+#include <stdio.h>
 
 int main() {
     short x_r[N], x_i[N];
@@ -31,19 +27,6 @@ int main() {
     fft_pointer(y_r, y_i);
     fft_short_pointer(x_r, x_i);
 
-    // 結果をファイルに出力
-    ofstream double_short_ofs("double_short.csv");
-    ofstream double_ofs("double.csv");
-    ofstream short_ofs("short.csv");
-    for (int i = 0; i < N; i++) {
-        double_short_ofs << y_r[i] - x_r[i] / (double)DIVISOR << "," << y_i[i] - x_i[i] / (double)DIVISOR << endl;
-        double_ofs << y_r[i] << "," << y_i[i] << endl;
-        short_ofs << x_r[i] / (double)DIVISOR << "," << x_i[i] / (double)DIVISOR << endl;
-    }
-    double_short_ofs.close();
-    double_ofs.close();
-    short_ofs.close();
-
     for (int i = 0; i < N; i++) {
         // √(実部^2+虚部^2)^2 (差分の2乗)
         sum += ((y_r[i] - x_r[i] / (double)DIVISOR) * 1.2 * (y_r[i] - x_r[i] / (double)DIVISOR) +
@@ -51,7 +34,7 @@ int main() {
     }
 
     // dftとfftの結果の比較(差分の2乗平均の平方根)
-    cout << sqrt(sum / N) << endl;
+    printf("%f",sqrt(sum / N));
 
     return 0;
 }

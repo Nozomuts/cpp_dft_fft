@@ -1,12 +1,17 @@
-#include "CONST.hpp"
-#include <iostream>
+#include "CONST.h"
 #include <math.h>
-
-using namespace std;
+#include <stdio.h>
 
 double sin_table[N / 4 / M + 1];
 double table[2];
 double sini, cosi, tmp;
+
+void swap(double *x, double *y)
+{
+    double tmp = *x;
+    *x = *y;
+    *y = tmp;
+}
 
 // テーブルを用いたsin関数
 double add_sin(int n) {
@@ -102,8 +107,8 @@ void bit_reverse_pointer(double *x_r, double *x_i) {
         for (int k = N >> 1; k > (i ^= k); k >>= 1)
             ;
         if (i < j) {
-            swap(x_r[i], x_r[j]); // 入れ替え
-            swap(x_i[i], x_i[j]);
+            swap(&x_r[i], &x_r[j]); // 入れ替え
+            swap(&x_i[i], &x_i[j]);
         }
     }
 }
@@ -114,8 +119,8 @@ void bit_reverse(double x_r[N], double x_i[N]) {
         for (int k = N >> 1; k > (i ^= k); k >>= 1)
             ;
         if (i < j) {
-            swap(x_r[i], x_r[j]); // 入れ替え
-            swap(x_i[i], x_i[j]);
+            swap(&x_r[i], &x_r[j]); // 入れ替え
+            swap(&x_i[i], &x_i[j]);
         }
     }
 }

@@ -1,12 +1,17 @@
-#include "CONST.hpp"
-#include <iostream>
+#include "CONST.h"
 #include <math.h>
-
-using namespace std;
+#include <stdio.h>
 
 short sin_table_short[N / 4 / M + 1];
 short table_short[2];
 short sini_short, cosi_short, tmp_short;
+
+void swap_short(short *x, short *y)
+{
+    short tmp = *x;
+    *x = *y;
+    *y = tmp;
+}
 
 short add_sin_short(int n) {
     n %= N;
@@ -91,8 +96,8 @@ void bit_reverse_short(short x_r[N], short x_i[N]) {
         for (int k = N >> 1; k > (i ^= k); k >>= 1)
             ;
         if (i < j) {
-            swap(x_r[i], x_r[j]); // 入れ替え
-            swap(x_i[i], x_i[j]);
+            swap_short(&x_r[i], &x_r[j]); // 入れ替え
+            swap_short(&x_i[i], &x_i[j]);
         }
     }
 }
@@ -126,8 +131,8 @@ void bit_reverse_short_pointer(short *x_r, short *x_i) {
         for (int k = N >> 1; k > (i ^= k); k >>= 1)
             ;
         if (i < j) {
-            swap(x_r[i], x_r[j]); // 入れ替え
-            swap(x_i[i], x_i[j]);
+            swap_short(&x_r[i], &x_r[j]); // 入れ替え
+            swap_short(&x_i[i], &x_i[j]);
         }
     }
 }
